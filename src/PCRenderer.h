@@ -30,6 +30,11 @@ public:
 	float depthThreshold;
 	float minDistance;
 	float scaleFactor;
+	float objectDepthThreshold; // how far in cm points should be to consider them a different object
+
+	float halfW, halfH;
+	float width, height;
+	bool useDepthFactor;
 
 	bool mesh;
 

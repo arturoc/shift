@@ -32,12 +32,15 @@ void testApp::setup(){
 	min_blob = 640*480/5;
 	max_blob = 640*480;
 
-	showContour = true;
+	showContour = false;
 
 	ofDisableArbTex();
 	pointTex.loadImage("point.png");
 
 	texPoints = false;
+
+	translateX=0;
+	translateY=0;
 
 	gui.init("");
 	gui.addTab("3d camera");
@@ -57,6 +60,8 @@ void testApp::setup(){
 	gui.addSpinSlider("axis z",&rot_axis.z,0,-1000);
 	gui.addSpinSlider("rot y",&rot,-180,180);
 	gui.addSpinSlider("translate z",&translateZ,-1000,1000);
+	gui.addSpinSlider("translate x",&translateX,-1000,1000);
+	gui.addSpinSlider("translate y",&translateY,-1000,1000);
 	gui.addSpinSlider("postranslate z",&postTranslateZ,-1000,1000);
 	gui.addLoadButton("settings.xml","settings");
 	gui.addSaveButton("settings.xml","settings");
@@ -80,6 +85,9 @@ void testApp::setup(){
 	gui.addSpinSlider("alpha",&alpha,0,255,1);
 	gui.addSpinSlider("p. size",&psize,0,64,1);
 	gui.addToggle("textured points",&texPoints);
+	gui.addSpinSlider("minDistance",&renderer.minDistance,0,-100,1);
+	gui.addSpinSlider("scaleFactor",&renderer.scaleFactor,0,.01,.001);
+	gui.addToggle("use depth factor",&renderer.useDepthFactor);
 
 	gui.loadFrom("settings.xml","settings");
 
@@ -130,6 +138,11 @@ void testApp::draw(){
 		ofTranslate(-rot_axis);
 
 		ofTranslate(0,0,translateZ);
+
+		if(renderer.useDepthFactor){
+			ofScale(2,2,1);
+			ofTranslate(translateX,translateY);
+		}
 
 		if(texPoints && !renderer.mesh)
 			renderer.draw(&pointTex.getTextureReference());

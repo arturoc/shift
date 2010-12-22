@@ -34,6 +34,10 @@ void VertexArray::addVertex(float x, float y, float z, float u, float v, unsigne
 	texVertexes = true;
 }
 
+void VertexArray::addVertex(const ofPoint & vertex){
+	addVertex(vertex.x,vertex.y,vertex.z);
+}
+
 void VertexArray::addVertex(const ComplexVertex & vertex){
 	vertexes.push_back(vertex);
 }

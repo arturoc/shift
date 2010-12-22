@@ -61,7 +61,7 @@ class testApp : public ofBaseApp{
 
 		ofPoint rot_axis;
 		float	rot;
-		float   translateZ;
+		float   translateZ,translateX,translateY;
 		float	postTranslateZ;
 
 		bool showContour, showDepth, showClipPlanes;
