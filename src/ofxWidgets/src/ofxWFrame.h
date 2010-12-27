@@ -26,6 +26,8 @@ public:
 	void init(float x, float y, float width, float height, const string & title="", const string & name="", bool growOnHeight=true);
 	void init(const ofRectangle & shape, const string & title="", const string & name="", bool growOnHeight = true);
 
+	string getControlName(const string & controlName, const string & title);
+
 	void addSaveButton(const string & filename, const string & xml_root);
 	void addLoadButton(const string & filename, const string & xml_root);
 

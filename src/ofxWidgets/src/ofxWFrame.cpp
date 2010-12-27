@@ -1,4 +1,5 @@
 #include "ofxWFrame.h"
+#include "ofxWUtils.h"
 
 ofPoint		ofxWFrame::next_pos;
 float		ofxWFrame::max_frame_width=0;
@@ -68,13 +69,13 @@ void ofxWFrame::addLoadButton(const string & filename, const string & xml_root){
 }
 
 void ofxWFrame::onSave(int & pressed){
-	if(pressed){
+	if(!pressed){
 		saveTo(filename,xml_root);
 	}
 }
 
 void ofxWFrame::onLoad(int & pressed){
-	if(pressed){
+	if(!pressed){
 		loadFrom(filename,xml_root);
 	}
 }
@@ -85,7 +86,8 @@ void ofxWFrame::saveTo(const string & filename, const string & xml_root){
 	xml.pushTag(xml_root);
 	map<string,ofxWidget*>::iterator it;
 	for(it=controlsIndex.begin(); it!=controlsIndex.end();it++){
-		it->second->saveTo(xml,it->first);
+		if(it->first!="LOAD" && it->first!="SAVE")
+			it->second->saveTo(xml,it->first);
 	}
 	xml.popTag();
 	xml.saveFile(filename);
@@ -97,7 +99,8 @@ void ofxWFrame::loadFrom(const string & filename, const string & xml_root){
 	xml.pushTag(xml_root);
 	map<string,ofxWidget*>::iterator it;
 	for(it=controlsIndex.begin(); it!=controlsIndex.end();it++){
-		it->second->loadFrom(xml,it->first);
+		if(it->first!="LOAD" && it->first!="SAVE")
+			it->second->loadFrom(xml,it->first);
 	}
 	xml.popTag();
 }
@@ -324,8 +327,24 @@ void ofxWFrame::addWidget(ofxWidget * widget, string controlName){
 	controlsIndex[controlName]=widget;
 }
 
+string ofxWFrame::getControlName(const string & controlName, const string & title){
+	if(controlName==""){
+		int i=0;
+		string escaped_title = title;
+		escaped_title = ofxWReplace(escaped_title,' ',"_");
+		escaped_title = ofxWReplace(escaped_title,':',"");
+		escaped_title = ofxWReplace(escaped_title,'/',"_");
+		while(controlsIndex.find(escaped_title+"_"+ofToString(i))!=controlsIndex.end()) i++;
+		cout << escaped_title+"_"+ofToString(i) << endl;
+		return escaped_title+"_"+ofToString(i);
+	}else{
+		return controlName;
+	}
+}
+
 
 ofxWSlider & ofxWFrame::addSlider(const string & title, int * value, int min, int max, string controlName, const string & _style){
+	controlName=getControlName(controlName,title);
 	ofxWSlider * slider = new ofxWSlider(controlName);
 	slider->init(title,value,min,max,_style==""?style:_style);
 
@@ -337,6 +356,7 @@ ofxWSlider & ofxWFrame::addSlider(const string & title, int * value, int min, in
 }
 
 ofxWSlider & ofxWFrame::addSlider(const string & title, float * value, float min, float max, string controlName, const string & _style){
+	controlName=getControlName(controlName,title);
 	ofxWSlider * slider = new ofxWSlider(controlName);
 	slider->init(title,value,min,max,_style==""?style:_style);
 
@@ -348,6 +368,7 @@ ofxWSlider & ofxWFrame::addSlider(const string & title, float * value, float min
 }
 
 ofxWSlider & ofxWFrame::addSlider(const string & title, int value, int min, int max, string controlName, const string & _style){
+	controlName=getControlName(controlName,title);
 	ofxWSlider * slider = new ofxWSlider(controlName);
 	slider->init(title,value,min,max,_style==""?style:_style);
 
@@ -359,6 +380,7 @@ ofxWSlider & ofxWFrame::addSlider(const string & title, int value, int min, int 
 }
 
 ofxWSlider & ofxWFrame::addSlider(const string & title, float value, float min, float max, string controlName, const string & _style){
+	controlName=getControlName(controlName,title);
 	ofxWSlider * slider = new ofxWSlider(controlName);
 	slider->init(title,value,min,max,_style==""?style:_style);
 
@@ -371,6 +393,7 @@ ofxWSlider & ofxWFrame::addSlider(const string & title, float value, float min, 
 
 
 ofxWSpinSlider & ofxWFrame::addSpinSlider(const string & title, int * value, int min, int max, int step, string controlName, const string & _style){
+	controlName=getControlName(controlName,title);
 	ofxWSpinSlider * slider = new ofxWSpinSlider(controlName);
 	slider->init(title,value,min,max,step,_style==""?style:_style);
 
@@ -382,6 +405,7 @@ ofxWSpinSlider & ofxWFrame::addSpinSlider(const string & title, int * value, int
 }
 
 ofxWSpinSlider & ofxWFrame::addSpinSlider(const string & title, float * value, float min, float max, float step,  string controlName, const string & _style){
+	controlName=getControlName(controlName,title);
 	ofxWSpinSlider * slider = new ofxWSpinSlider(controlName);
 	slider->init(title,value,min,max,step,_style==""?style:_style);
 
@@ -393,6 +417,7 @@ ofxWSpinSlider & ofxWFrame::addSpinSlider(const string & title, float * value, f
 }
 
 ofxWSpinSlider & ofxWFrame::addSpinSlider(const string & title, int value, int min, int max, int step, string controlName, const string & _style){
+	controlName=getControlName(controlName,title);
 	ofxWSpinSlider * slider = new ofxWSpinSlider(controlName);
 	slider->init(title,value,min,max,step,_style==""?style:_style);
 
@@ -404,6 +429,7 @@ ofxWSpinSlider & ofxWFrame::addSpinSlider(const string & title, int value, int m
 }
 
 ofxWSpinSlider & ofxWFrame::addSpinSlider(const string & title, float value, float min, float max, float step,  string controlName, const string & _style){
+	controlName=getControlName(controlName,title);
 	ofxWSpinSlider * slider = new ofxWSpinSlider(controlName);
 	slider->init(title,value,min,max,step,_style==""?style:_style);
 
@@ -415,6 +441,7 @@ ofxWSpinSlider & ofxWFrame::addSpinSlider(const string & title, float value, flo
 }
 
 ofxW2DSlider & ofxWFrame::add2DSlider(const string & title, float xvalue, float yvalue, float xmin, float xmax, float ymin, float ymax, string controlName, const string & _style){
+	controlName=getControlName(controlName,title);
 	ofxW2DSlider * slider = new ofxW2DSlider(controlName);
 	slider->init(title,xvalue,yvalue,xmin,xmax,ymin,ymax,_style==""?style:_style);
 
@@ -426,7 +453,7 @@ ofxW2DSlider & ofxWFrame::add2DSlider(const string & title, float xvalue, float 
 }
 
 ofxWButton & ofxWFrame::addButton(const string & title, int * value, string controlName, string _style){
-
+	controlName=getControlName(controlName,title);
 	ofxWButton * button = new ofxWButton(controlName);
 	button->init(title,value,_style==""?style:_style);
 
@@ -438,7 +465,7 @@ ofxWButton & ofxWFrame::addButton(const string & title, int * value, string cont
 }
 
 ofxWButton & ofxWFrame::addButton(const string & title, bool * value, string controlName, string _style){
-
+	controlName=getControlName(controlName,title);
 	ofxWButton * button = new ofxWButton(controlName);
 	button->init(title,value,_style==""?style:_style);
 
@@ -450,7 +477,7 @@ ofxWButton & ofxWFrame::addButton(const string & title, bool * value, string con
 }
 
 ofxWButton & ofxWFrame::addButton(const string & title, int value, string controlName, string _style){
-	cout << "adding " << controlName << " value: " << value << endl;
+	controlName=getControlName(controlName,title);
 	ofxWButton * button = new ofxWButton(controlName);
 	button->init(title,value,_style==""?style:_style);
 
@@ -462,7 +489,7 @@ ofxWButton & ofxWFrame::addButton(const string & title, int value, string contro
 }
 
 ofxWButton & ofxWFrame::addButton(const string & title, string controlName, string _style){
-
+	controlName=getControlName(controlName,title);
 	ofxWButton * button = new ofxWButton(controlName);
 	button->init(title,_style==""?style:_style);
 
@@ -475,6 +502,7 @@ ofxWButton & ofxWFrame::addButton(const string & title, string controlName, stri
 
 
 ofxWToggle & ofxWFrame::addToggle(const string & title, int * value, string controlName, string _style){
+	controlName=getControlName(controlName,title);
 	ofxWToggle * toggle = new ofxWToggle(controlName);
 	toggle->init(title,value,_style==""?style:_style);
 
@@ -486,6 +514,7 @@ ofxWToggle & ofxWFrame::addToggle(const string & title, int * value, string cont
 }
 
 ofxWToggle & ofxWFrame::addToggle(const string & title, bool * value, string controlName, string _style){
+	controlName=getControlName(controlName,title);
 	ofxWToggle * toggle = new ofxWToggle(controlName);
 	toggle->init(title,value,_style==""?style:_style);
 
@@ -497,6 +526,7 @@ ofxWToggle & ofxWFrame::addToggle(const string & title, bool * value, string con
 }
 
 ofxWToggle & ofxWFrame::addToggle(const string & title, int value, string controlName, string _style){
+	controlName=getControlName(controlName,title);
 	ofxWToggle * toggle = new ofxWToggle(controlName);
 	toggle->init(title,value,_style==""?style:_style);
 
@@ -508,6 +538,7 @@ ofxWToggle & ofxWFrame::addToggle(const string & title, int value, string contro
 }
 
 ofxWToggle & ofxWFrame::addToggle(const string & title, string controlName, string _style){
+	controlName=getControlName(controlName,title);
 	ofxWToggle * toggle = new ofxWToggle(controlName);
 	toggle->init(title,_style==""?style:_style);
 
@@ -572,6 +603,7 @@ ofxWToggle & ofxWFrame::addGroupedToggle(const string & title, string group, str
 }
 
 ofxWTextBox & ofxWFrame::addTextBox(const string & title, string text, string controlName, string _style){
+	controlName=getControlName(controlName,title);
 	ofxWTextBox * textBox = new ofxWTextBox(controlName);
 	textBox->init(title,_style==""?style:_style);
 
@@ -584,6 +616,7 @@ ofxWTextBox & ofxWFrame::addTextBox(const string & title, string text, string co
 }
 
 ofxWidgetFps & ofxWFrame::addFps(string controlName){
+	controlName=getControlName(controlName,"fps");
 	ofxWidgetFps * fps = new ofxWidgetFps(controlName);
 
 	/*fps->setEnabledStyle(buttonStyle);

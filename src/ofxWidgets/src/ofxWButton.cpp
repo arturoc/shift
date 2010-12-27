@@ -270,5 +270,7 @@ void ofxWButton::saveTo(ofxXmlSettings & xml, const string & tag){
 
 void ofxWButton::loadFrom(ofxXmlSettings & xml, const string & tag){
 	value = xml.getValue(tag,0);
+	if(value) on();
+	else off();
 }
 
