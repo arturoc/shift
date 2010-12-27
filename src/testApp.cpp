@@ -46,12 +46,12 @@ void testApp::setup(){
 	gui.addTab("3d camera");
 	ofAddListener(gui.addSpinSlider("camera y:",640,-640,640).floatEvent,this,&testApp::cameraYChanged);
 	ofAddListener(gui.addSpinSlider("camera lookat y:",320,-640,640).floatEvent,this,&testApp::cameraLookAtYChanged);
-	gui.addSpinSlider("render 1 in x: ",&renderer.oneInX,1,30);
-	gui.addSpinSlider("render 1 in y: ",&renderer.oneInY,1,30);
+	gui.addSpinSlider("render 1 in x: ",&pc_renderer.oneInX,1,30);
+	gui.addSpinSlider("render 1 in y: ",&pc_renderer.oneInY,1,30);
 	//gui.addSpinSlider("depth threshold: ",&renderer.depthThreshold,0,1000);
 	gui.addSpinSlider("near clip: ",&nearClip,0,255);
 	gui.addSpinSlider("far clip: ",&farClip,0,255);
-	gui.addSpinSlider("depth thres:",&renderer.depthThreshold,0,10000);
+	gui.addSpinSlider("depth thres:",&depthThreshold,0,10000);
 	gui.addSpinSlider("fov: ",&fov,0,200);
 	gui.addSpinSlider("min blob:",&min_blob,0,640*480);
 	gui.addSpinSlider("max blob:",&max_blob,0,640*480);
@@ -80,14 +80,14 @@ void testApp::setup(){
 	alpha = 255;
 	psize = 1;
 	gui.addTab("render");
-	gui.addToggle("draw mesh", &renderer.mesh);
+	gui.addToggle("draw mesh", &mesh);
 	gui.addSpinSlider("gray",&gray,0,255,1);
 	gui.addSpinSlider("alpha",&alpha,0,255,1);
 	gui.addSpinSlider("p. size",&psize,0,64,1);
 	gui.addToggle("textured points",&texPoints);
-	gui.addSpinSlider("minDistance",&renderer.minDistance,0,-100,1);
-	gui.addSpinSlider("scaleFactor",&renderer.scaleFactor,0,.01,.001);
-	gui.addToggle("use depth factor",&renderer.useDepthFactor);
+	gui.addSpinSlider("minDistance",&minDistance,0,-100,1);
+	gui.addSpinSlider("scaleFactor",&scaleFactor,0,.01,.001);
+	gui.addToggle("use depth factor",&useDepthFactor);
 
 	gui.loadFrom("settings.xml","settings");
 
@@ -104,14 +104,29 @@ void testApp::setup(){
 //--------------------------------------------------------------
 void testApp::update(){
 	source->update();
-	cvdepth.setFromPixels(source->getDepthPixels(),640,480);
-	grayThreshFar = cvdepth;
-	grayThresh = cvdepth;
-	grayThreshFar.threshold(farClip, true);
-	grayThresh.threshold(nearClip);
-	cvAnd(grayThresh.getCvImage(), grayThreshFar.getCvImage(), cvdepth.getCvImage(), NULL);
-	contourFinder.findContours(cvdepth,min_blob,max_blob,10,false,true);
-	renderer.update(source->getDistancePixels(),640,480);
+	if(showContour){
+		cvdepth.setFromPixels(source->getDepthPixels(),640,480);
+		grayThreshFar = cvdepth;
+		grayThresh = cvdepth;
+		grayThreshFar.threshold(farClip, true);
+		grayThresh.threshold(nearClip);
+		cvAnd(grayThresh.getCvImage(), grayThreshFar.getCvImage(), cvdepth.getCvImage(), NULL);
+		contourFinder.findContours(cvdepth,min_blob,max_blob,10,false,true);
+	}
+
+	if(mesh){
+		mesh_renderer.depthThreshold = depthThreshold;
+		mesh_renderer.minDistance = minDistance;
+		mesh_renderer.scaleFactor = scaleFactor;
+		mesh_renderer.useDepthFactor = useDepthFactor;
+		mesh_renderer.update(source->getDistancePixels(),640,480);
+	}else{
+		pc_renderer.depthThreshold = depthThreshold;
+		pc_renderer.minDistance = minDistance;
+		pc_renderer.scaleFactor = scaleFactor;
+		pc_renderer.useDepthFactor = useDepthFactor;
+		pc_renderer.update(source->getDistancePixels(),640,480);
+	}
 }
 
 //--------------------------------------------------------------
@@ -139,21 +154,23 @@ void testApp::draw(){
 
 		ofTranslate(0,0,translateZ);
 
-		if(renderer.useDepthFactor){
+		if(useDepthFactor){
 			ofScale(2,2,1);
 			ofTranslate(translateX,translateY);
 		}
 
-		if(texPoints && !renderer.mesh)
-			renderer.draw(&pointTex.getTextureReference());
+		if(texPoints && !mesh)
+			pc_renderer.draw(&pointTex.getTextureReference());
+		else if(!mesh)
+			pc_renderer.draw();
 		else
-			renderer.draw();
+			mesh_renderer.draw();
 
 		if(showClipPlanes){
 			ofSetColor(255,0,0);
 			ofTranslate(0,0,-nearClip);
 			ofRect(0,0,640,480);
-			ofTranslate(0,0,nearClip-renderer.depthThreshold);
+			ofTranslate(0,0,nearClip-depthThreshold);
 			ofRect(0,0,640,480);
 		}
 	ofPopMatrix();

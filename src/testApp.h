@@ -8,6 +8,7 @@
 #include "ofxWidgets.h"
 #include "KinectPlayer.h"
 #include "PCRenderer.h"
+#include "MeshRenderer.h"
 #include "ofx3DUtils.h"
 #include "ofxOpenCv.h"
 #include "ofxFbo.h"
@@ -43,7 +44,8 @@ class testApp : public ofBaseApp{
 		ofxKinect	 kinect;
 		of3DVideo * source;
 
-		PCRenderer renderer;
+		PCRenderer pc_renderer;
+		MeshRenderer mesh_renderer;
 
 		ofxCamera camera;
 
@@ -74,6 +76,10 @@ class testApp : public ofBaseApp{
 		ofImage pointTex;
 
 		bool texPoints;
+		bool mesh;
+
+		float depthThreshold,minDistance,scaleFactor;
+		bool useDepthFactor;
 };
 
 #endif
