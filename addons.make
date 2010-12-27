@@ -3,3 +3,4 @@ ofxOpenCv
 ofxXmlSettings
 ofxVectorMath
 ofxFbo
+ofxShader

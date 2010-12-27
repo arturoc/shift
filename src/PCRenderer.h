@@ -10,6 +10,7 @@
 
 #include "VertexArray.h"
 #include "Renderer.h"
+#include "ofxShader.h"
 
 class PCRenderer: public Renderer {
 public:
@@ -23,9 +24,19 @@ public:
 	void draw(ofTexture * tex=NULL);
 
 	int oneInX, oneInY;
+	bool dof;
+	float focusDistance;
+	float aperture;
+	float pointBrightness;
+	float rgbBrightness;
+	float maxPointSize;
 
 private:
 	VertexArray va;
+	vector<float> pointSizes;
+	ofxShader shader;
+
+
 
 };
 

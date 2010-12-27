@@ -44,9 +44,8 @@ void VertexArray::addVertex(const ComplexVertex & vertex){
 
 void VertexArray::draw(GLenum drawType,ofTexture * tex){
 	glEnableClientState(GL_VERTEX_ARRAY);
-
 	if(tex!=NULL) tex->bind();
-	if(drawType==GL_POINTS && tex!=NULL){
+	if(drawType==GL_POINTS && tex){
 
 		//glEnable(texData.textureTarget);
 		/*glBindTexture( tex->texData.textureTarget, (GLuint)tex->texData.textureID);
@@ -60,9 +59,9 @@ void VertexArray::draw(GLenum drawType,ofTexture * tex){
 	    //glEnable( GL_BLEND );
 	    //glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 		//tex->bind();
-		glTexEnvf( GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE );
+		glTexEnvi( GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE );
 		glEnable( GL_POINT_SPRITE );
-		glPointParameteri(GL_POINT_SPRITE_COORD_ORIGIN, GL_LOWER_LEFT);
+		//glPointParameteri(GL_POINT_SPRITE_COORD_ORIGIN, GL_LOWER_LEFT);
 	    //glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
 
@@ -73,7 +72,7 @@ void VertexArray::draw(GLenum drawType,ofTexture * tex){
 			glColorPointer(3, GL_FLOAT, sizeof(ComplexVertex), &vertexes[0].r);
 		}
 		glDrawArrays(drawType, 0, vertexes.size());
-		glBindBuffer(GL_ARRAY_BUFFER,0);
+		//glBindBuffer(GL_ARRAY_BUFFER,0);
 		glDisable(GL_POINT_SPRITE);
 	}else{
 		glVertexPointer(3, GL_FLOAT, sizeof(ComplexVertex), &vertexes[0].x);

@@ -44,15 +44,15 @@ void testApp::setup(){
 
 	gui.init("");
 	gui.addTab("3d camera");
-	ofAddListener(gui.addSpinSlider("camera y:",640,-640,640).floatEvent,this,&testApp::cameraYChanged);
-	ofAddListener(gui.addSpinSlider("camera lookat y:",320,-640,640).floatEvent,this,&testApp::cameraLookAtYChanged);
-	gui.addSpinSlider("render 1 in x: ",&pc_renderer.oneInX,1,30);
-	gui.addSpinSlider("render 1 in y: ",&pc_renderer.oneInY,1,30);
+	//ofAddListener(gui.addSpinSlider("camera y:",640,-640,640).floatEvent,this,&testApp::cameraYChanged);
+	//ofAddListener(gui.addSpinSlider("camera lookat y:",320,-640,640).floatEvent,this,&testApp::cameraLookAtYChanged);
+	gui.addSpinSlider("render 1 in x:",&pc_renderer.oneInX,1,30);
+	gui.addSpinSlider("render 1 in y:",&pc_renderer.oneInY,1,30);
 	//gui.addSpinSlider("depth threshold: ",&renderer.depthThreshold,0,1000);
-	gui.addSpinSlider("near clip: ",&nearClip,0,255);
-	gui.addSpinSlider("far clip: ",&farClip,0,255);
+	gui.addSpinSlider("near clip:",&nearClip,0,255);
+	gui.addSpinSlider("far clip:",&farClip,0,255);
 	gui.addSpinSlider("depth thres:",&depthThreshold,0,10000);
-	gui.addSpinSlider("fov: ",&fov,0,200);
+	gui.addSpinSlider("fov:",&fov,0,200);
 	gui.addSpinSlider("min blob:",&min_blob,0,640*480);
 	gui.addSpinSlider("max blob:",&max_blob,0,640*480);
 	gui.addSpinSlider("axis x",&rot_axis.x,0,1000);
@@ -88,6 +88,13 @@ void testApp::setup(){
 	gui.addSpinSlider("minDistance",&minDistance,0,-100,1);
 	gui.addSpinSlider("scaleFactor",&scaleFactor,0,.01,.001);
 	gui.addToggle("use depth factor",&useDepthFactor);
+	gui.addToggle("depth of field",&pc_renderer.dof);
+
+	gui.addSpinSlider("focusDistance", &pc_renderer.focusDistance, 0, 2000);
+	gui.addSpinSlider("aperture", &pc_renderer.aperture, 0, .1, .001);
+	gui.addSpinSlider("pointBrightness", &pc_renderer.pointBrightness, 0, 1, .01);
+	gui.addSpinSlider("rgbBrightness",  &pc_renderer.rgbBrightness, 0, 1, .01);
+	gui.addSpinSlider("maxPointSize", &pc_renderer.maxPointSize, 0, 30);
 
 	gui.loadFrom("settings.xml","settings");
 
@@ -161,7 +168,7 @@ void testApp::draw(){
 			ofTranslate(translateX,translateY);
 		}
 
-		if(texPoints && !mesh)
+		if((texPoints || pc_renderer.dof) && !mesh)
 			pc_renderer.draw(&pointTex.getTextureReference());
 		else if(!mesh)
 			pc_renderer.draw();
@@ -181,7 +188,7 @@ void testApp::draw(){
 	ofSetColor(255,255,255);
 	ofSetupScreen();
 	//ofViewport(0,0,ofGetWidth(),ofGetHeight());
-	fbo.draw(ofGetWidth()-640,0,640,480);
+	fbo.draw(ofGetWidth()-fbo.getWidth(),0);
 
 	if(showDepth){
 		cvdepth.draw(ofGetWidth()-320,ofGetHeight()-240,320,240);
@@ -220,6 +227,7 @@ void testApp::liveVideoChanged(bool & pressed){
 	if(pressed){
 		kinect.init();
 		kinect.open();
+		kinect.setCameraTiltAngle(tilt);
 		source = &kinect;
 	}else{
 		kPlayer.setup("depth.bin");
