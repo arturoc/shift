@@ -92,6 +92,7 @@ void testApp::setup(){
 	gui.loadFrom("settings.xml","settings");
 
 	gui.addFps();
+
 	//gui.addSpinSlider("camera z",);
 	//ofAddListener(gui.add2DSlider("camera xz: ",0.f,0.f,-1000.f,1000.f,-1000.f,1000.f).floatEvent,this,&testApp::cameraPosChanged);
 	//ofAddListener(gui.add2DSlider("lookat xz: ",0.f,0.f,-1000.f,1000.f,-1000.f,1000.f).floatEvent,this,&testApp::cameraLookAtChanged);
@@ -133,18 +134,19 @@ void testApp::update(){
 void testApp::draw(){
 
 	ofNoFill();
-	//fbo.begin();
-	ofBackground(0,0,0);
+	fbo.begin();
+	//ofBackground(0,0,0);
+	ofClear(0,0,0,255);
 	ofPushMatrix();
 		ofSetColor(gray,gray,gray,alpha);
 		glPointSize(psize);
 
 		if(fov>0)
-			ofSetupScreenPerspective(640,480,true,fov);
+			ofSetupScreenPerspective(640,480,false,fov);
 		else
-			ofSetupScreenOrtho(640,480,true);
-		ofViewport(0,0,640,480);
-		ofBackground(0, 0, 0);
+			ofSetupScreenOrtho(640,480,false);
+		//ofViewport(0,0,640,480);
+		//ofBackground(0, 0, 0);
 
 		ofTranslate(0,0,postTranslateZ);
 
@@ -174,12 +176,12 @@ void testApp::draw(){
 			ofRect(0,0,640,480);
 		}
 	ofPopMatrix();
-	//fbo.end();
+	fbo.end();
 
 	ofSetColor(255,255,255);
 	ofSetupScreen();
-	ofViewport(0,0,ofGetWidth(),ofGetHeight());
-	//fbo.draw(ofGetWidth()-640,0);
+	//ofViewport(0,0,ofGetWidth(),ofGetHeight());
+	fbo.draw(ofGetWidth()-640,0,640,480);
 
 	if(showDepth){
 		cvdepth.draw(ofGetWidth()-320,ofGetHeight()-240,320,240);
