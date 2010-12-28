@@ -141,7 +141,7 @@ void testApp::update(){
 		pc_renderer.update(source->getDistancePixels(),source->getCalibratedRGBPixels(),640,480);
 	}
 	if(showRGB && source==(of3DVideo*)&kinect){
-		texRGBCalibrated.loadData(kinect.getCalibratedRGBPixels(),640,480,GL_RGB);
+		//texRGBCalibrated.loadData(kinect.getCalibratedRGBPixels(),640,480,GL_RGB);
 	}
 }
 
@@ -204,8 +204,8 @@ void testApp::draw(){
 		ofRect(ofGetWidth()-320,ofGetHeight()-240,320,240);
 	}
 	if(showRGB){
-		//kinect.draw(ofGetWidth()-320,ofGetHeight()-240,320,240);
-		texRGBCalibrated.draw(ofGetWidth()-320,ofGetHeight()-240,320,240);
+		kinect.draw(ofGetWidth()-320,ofGetHeight()-240,320,240);
+		//texRGBCalibrated.draw(ofGetWidth()-320,ofGetHeight()-240,320,240);
 		ofRect(ofGetWidth()-320,ofGetHeight()-240,320,240);
 	}
 
