@@ -65,18 +65,42 @@ void PCRenderer::update(float * vertexes, int w,int h){
 }
 
 void PCRenderer::update(float * vertexes, unsigned char* rgb, int w,int h){
+	va.clear();
+	pointSizes.clear();
+	/// 125
+	/// 346
 	float depth;
-	int inc=1;
-	for(int y=0; y<h; y+=inc){
-		for(int x=0;x<w;x+=inc){
+	float depthFactor;
+	unsigned char r,g,b;
+	ofPoint point;
+
+	for(int y=0; y<h; y+=oneInY){
+		for(int x=0;x<w;x+=oneInX){
 			depth = *vertexes++;
-			if(depth!=0 && depth<depthThreshold){
-				float depthFactor = (-depth + minDistance) * scaleFactor;
-				va.addVertex((x) * depthFactor,(y) * depthFactor,depth,rgb[0],rgb[1],rgb[2]);
+			r = *rgb++;
+			g = *rgb++;
+			b = *rgb++;
+
+			if(x+oneInX<w){
+				vertexes+=oneInX-1;
+				rgb+=(oneInX-1)*3;
+			}else{
+				vertexes+=w-x-1;
+				rgb+=(w-x-1)*3;
 			}
 
-			rgb+=3;
+			if(depth==0 || depth>depthThreshold) continue;
+
+			if(useDepthFactor && !dof){ // the dof shader automatically does the depthFactor conversion
+				point = getRealWorldCoordinates(x,y,depth);
+			}else{
+				point.set(x,y,-depth);
+			}
+
+			va.addVertex(point,r,g,b);
 		}
+		vertexes += (oneInY-1)*w;
+		rgb += (oneInY-1)*w*3;
 	}
 }
 
@@ -92,8 +116,6 @@ void PCRenderer::draw(ofTexture * tex){
 		shader.setUniform1f("pointBrightness", pointBrightness);
 		shader.setUniform1f("rgbBrightness",  rgbBrightness);
 		shader.setUniform1f("maxPointSize", maxPointSize);
-		shader.setUniform1f("minDistance",  minDistance);
-		shader.setUniform1f("scaleFactor", scaleFactor);
 
 		//sizeLoc = shader.getAttributeLocation("particleSize");
 		//glEnableVertexAttribArrayARB(sizeLoc);

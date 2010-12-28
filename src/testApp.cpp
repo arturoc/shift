@@ -103,6 +103,8 @@ void testApp::setup(){
 
 	gui.addFps();
 
+	texRGBCalibrated.allocate(640,480,GL_RGB);
+
 	//gui.addSpinSlider("camera z",);
 	//ofAddListener(gui.add2DSlider("camera xz: ",0.f,0.f,-1000.f,1000.f,-1000.f,1000.f).floatEvent,this,&testApp::cameraPosChanged);
 	//ofAddListener(gui.add2DSlider("lookat xz: ",0.f,0.f,-1000.f,1000.f,-1000.f,1000.f).floatEvent,this,&testApp::cameraLookAtChanged);
@@ -136,7 +138,10 @@ void testApp::update(){
 		pc_renderer.minDistance = minDistance;
 		pc_renderer.scaleFactor = scaleFactor;
 		pc_renderer.useDepthFactor = useDepthFactor;
-		pc_renderer.update(source->getDistancePixels(),640,480);
+		pc_renderer.update(source->getDistancePixels(),source->getCalibratedRGBPixels(),640,480);
+	}
+	if(showRGB && source==(of3DVideo*)&kinect){
+		texRGBCalibrated.loadData(kinect.getCalibratedRGBPixels(),640,480,GL_RGB);
 	}
 }
 
@@ -199,7 +204,8 @@ void testApp::draw(){
 		ofRect(ofGetWidth()-320,ofGetHeight()-240,320,240);
 	}
 	if(showRGB){
-		kinect.draw(ofGetWidth()-320,ofGetHeight()-240,320,240);
+		//kinect.draw(ofGetWidth()-320,ofGetHeight()-240,320,240);
+		texRGBCalibrated.draw(ofGetWidth()-320,ofGetHeight()-240,320,240);
 		ofRect(ofGetWidth()-320,ofGetHeight()-240,320,240);
 	}
 

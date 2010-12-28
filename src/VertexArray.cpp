@@ -22,7 +22,7 @@ void VertexArray::addVertex(float x, float y, float z){
 }
 
 void VertexArray::addVertex(float x, float y, float z, unsigned char r, unsigned char g, unsigned char b){
-	ComplexVertex vertex = {x,y,z,0,0,r,g,b};
+	ComplexVertex vertex = {x,y,z,0.f,0.f,r,g,b};
 	addVertex(vertex);
 	colorVertexes = true;
 }
@@ -36,6 +36,10 @@ void VertexArray::addVertex(float x, float y, float z, float u, float v, unsigne
 
 void VertexArray::addVertex(const ofPoint & vertex){
 	addVertex(vertex.x,vertex.y,vertex.z);
+}
+
+void VertexArray::addVertex(const ofPoint & vertex, unsigned char r, unsigned char g, unsigned char b){
+	addVertex(vertex.x,vertex.y,vertex.z,r,g,b);
 }
 
 void VertexArray::addVertex(const ComplexVertex & vertex){
@@ -69,7 +73,7 @@ void VertexArray::draw(GLenum drawType,ofTexture * tex){
 		glVertexPointer(3, GL_FLOAT, sizeof(ComplexVertex), &vertexes[0].x);
 		if(colorVertexes){
 			glEnableClientState (GL_COLOR_ARRAY);
-			glColorPointer(3, GL_FLOAT, sizeof(ComplexVertex), &vertexes[0].r);
+			glColorPointer(3, GL_UNSIGNED_BYTE, sizeof(ComplexVertex), &vertexes[0].r);
 		}
 		glDrawArrays(drawType, 0, vertexes.size());
 		//glBindBuffer(GL_ARRAY_BUFFER,0);
@@ -88,7 +92,12 @@ void VertexArray::draw(GLenum drawType,ofTexture * tex){
 	}
 
 	if(tex!=NULL) tex->unbind();
-
+	if(colorVertexes){
+		glDisableClientState(GL_COLOR_ARRAY);
+	}
+	if(texVertexes){
+		//TODO: disable texture coords array
+	}
 
 		//glEnableClientState(GL_POINT_SIZE_ARRAY_OES);
 	//glPointSizePointerOES(GL_FLOAT, sizeof(PointSprite2D), (GLvoid*) (sizeof(m_vertices[0].position) + sizeof(m_vertices[0].color)));

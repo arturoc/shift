@@ -5,9 +5,10 @@
 #include "ofGraphics.h"
 #include "ofTypes.h"
 
+#include "of3DVideo.h"
+
 #include "ofxThread.h"
 #include "ofxVectorMath.h"
-#include "of3DVideo.h"
 
 #include <libusb.h>
 #include "libfreenect.h"
@@ -44,6 +45,7 @@ class ofxKinect : public of3DVideo, protected ofxThread{
 		
 		/// calculates the coordinate in the world for the pixel (perspective calculation). Center  of image is (0.0)
 		ofxPoint3f getWorldCoordinateFor(int x, int y);
+		ofxPoint3f getWorldCoordinateFor(int x, int y, float z);
 
 		ofColor	getColorAt(int x, int y);
 		ofColor getColorAt(const ofPoint & p);
@@ -51,8 +53,8 @@ class ofxKinect : public of3DVideo, protected ofxThread{
 		ofColor getCalibratedColorAt(int x, int y);
 		ofColor getCalibratedColorAt(const ofPoint & p);		
 
-		ofxMatrix4x4 getRGBDepthMatrix();
-		void setRGBDepthMatrix(const ofxMatrix4x4 & matrix);
+		//ofxMatrix4x4 getRGBDepthMatrix();
+		//void setRGBDepthMatrix(const ofxMatrix4x4 & matrix);
 		
 		float 			getHeight();
 		float 			getWidth();
@@ -140,7 +142,7 @@ class ofxKinect : public of3DVideo, protected ofxThread{
 		
 		bool bDepthNearValueWhite;
 		
-		ofxMatrix4x4		rgbDepthMatrix;
+		//ofxMatrix4x4		rgbDepthMatrix;
 
 		bool				bInfrared;
 		int					bytespp;
@@ -151,5 +153,17 @@ class ofxKinect : public of3DVideo, protected ofxThread{
     
 		// thread function
 		void threadedFunction();
+
+
+		static const double fx_d = 1.0 / 5.9421434211923247e+02;
+		static const double fy_d = 1.0 / 5.9104053696870778e+02;
+		static const double cx_d = 3.3930780975300314e+02;
+		static const double cy_d = 2.4273913761751615e+02;
+		static const double fx_rgb = 5.2921508098293293e+02;
+		static const double fy_rgb = 5.2556393630057437e+02;
+		static const double cx_rgb = 3.2894272028759258e+02;
+		static const double cy_rgb = 2.6748068171871557e+02;
+		ofxVec3f T_rgb;
+		ofxMatrix3x3 R_rgb;
 };
 

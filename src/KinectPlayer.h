@@ -37,6 +37,7 @@ public:
 	unsigned char * getPixels();
 	unsigned char * getDepthPixels();
 	float * getDistancePixels();
+	unsigned char * getCalibratedRGBPixels();
 
 private:
 	FILE * f;
@@ -45,6 +46,7 @@ private:
 	unsigned char *depthBuffer;
 	ofTexture tex;
 	bool bUseTexture;
+	unsigned char *rgb;
 };
 
 #endif /* KINECTPLAYER_H_ */

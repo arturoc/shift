@@ -22,6 +22,7 @@ public:
 	virtual ~VertexArray();
 
 	void addVertex(const ofPoint & vertex);
+	void addVertex(const ofPoint & vertex, unsigned char r, unsigned char g, unsigned char b);
 	void addVertex(float x, float y, float z);
 	void addVertex(float x, float y, float z, unsigned char r, unsigned char g, unsigned char b);
 	void addVertex(float x, float y, float z, float u, float v, unsigned char r, unsigned char g, unsigned char b);

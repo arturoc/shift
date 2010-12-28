@@ -12,15 +12,17 @@ KinectPlayer::KinectPlayer() {
 	buf = 0;
 	depthBuffer = 0;
 	distanceBuffer = 0;
+	rgb = 0;
 	bUseTexture = true;
 }
 
 KinectPlayer::~KinectPlayer() {
 	close();
 
-	if(buf) delete buf;
-	if(distanceBuffer) delete distanceBuffer;
-	if(depthBuffer) delete depthBuffer;
+	if(buf) delete[] buf;
+	if(distanceBuffer) delete[] distanceBuffer;
+	if(depthBuffer) delete[] depthBuffer;
+	if(rgb) delete[] rgb;
 }
 
 void KinectPlayer::setUseTexture(bool _bUseTexture){
@@ -32,6 +34,8 @@ void KinectPlayer::setup(const string & file){
 	if(!buf) buf 		= new uint16_t[640*480];
 	if(!distanceBuffer) distanceBuffer = new float[640*480];
 	if(!depthBuffer) depthBuffer = new unsigned char[640*480];
+	if(!rgb) rgb = new unsigned char[640*480*3];
+	memset(rgb,255,640*480*3);
 	if(!tex.bAllocated())
 		tex.allocate(640,480,GL_LUMINANCE);
 }
@@ -74,7 +78,7 @@ void KinectPlayer::draw(float x, float y, float w, float h){
 }
 
 unsigned char * KinectPlayer::getPixels(){
-	return 0;
+	return rgb;
 }
 
 unsigned char * KinectPlayer::getDepthPixels(){
@@ -83,6 +87,10 @@ unsigned char * KinectPlayer::getDepthPixels(){
 
 float * KinectPlayer::getDistancePixels(){
 	return distanceBuffer;
+}
+
+unsigned char * KinectPlayer::getCalibratedRGBPixels(){
+	return rgb;
 }
 
 

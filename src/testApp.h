@@ -80,6 +80,8 @@ class testApp : public ofBaseApp{
 
 		float depthThreshold,minDistance,scaleFactor;
 		bool useDepthFactor;
+
+		ofTexture texRGBCalibrated;
 };
 
 #endif
