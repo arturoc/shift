@@ -25,7 +25,6 @@ void MeshRenderer::setup(){
 void MeshRenderer::update(float * vertexes, int w,int h){
 	va.clear();
 	float depth1,depth2,depth3,depth4,depth5,depth6;
-	float depthFactor,depthFactor2,depthFactor3,depthFactor4,depthFactor5,depthFactor6;
 	ofPoint point,point2,point3,point4,point5,point6;
 	int inc=2;
 
