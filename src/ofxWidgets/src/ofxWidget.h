@@ -16,7 +16,7 @@
 #include "ofxXmlSettings.h"
 
 //#define OFXWIDGETS_USING_TUIO
-#define OFXWIDGETS_SEND_OSC
+//#define OFXWIDGETS_SEND_OSC
 
 #ifdef OFXWIDGETS_USING_TUIO
 #include "ofxTuioClient.h"
