@@ -66,7 +66,7 @@ class testApp : public ofBaseApp{
 		float   translateZ,translateX,translateY;
 		float	postTranslateZ;
 
-		bool showContour, showDepth, showClipPlanes;
+		bool showContour, showDepth, showClipPlanes, showRGB;
 
 		ofxFbo fbo;
 

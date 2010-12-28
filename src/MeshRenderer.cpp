@@ -42,18 +42,12 @@ void MeshRenderer::update(float * vertexes, int w,int h){
 			depth6 = *(vertexes+w);
 
 			if(useDepthFactor){
-				depthFactor = getDepthFactor(depth1);
-				depthFactor2 = getDepthFactor(depth2);
-				depthFactor3 = getDepthFactor(depth3);
-				depthFactor4 = getDepthFactor(depth4);
-				depthFactor5 = getDepthFactor(depth5);
-				depthFactor6 = getDepthFactor(depth6);
-				point.set((x-halfW)*depthFactor,(y-halfH)*depthFactor,-depth1);
-				point2.set((x+1-halfW)*depthFactor2,(y-halfH)*depthFactor2,-depth2);
-				point3.set((x-halfW)*depthFactor2,(y+1-halfH)*depthFactor3,-depth3);
-				point4.set((x+1-halfW)*depthFactor4,(y+1-halfH)*depthFactor4,-depth4);
-				point5.set((x+2-halfW)*depthFactor5,(y-halfH)*depthFactor5,-depth5);
-				point6.set((x+2-halfW)*depthFactor6,(y+1-halfH)*depthFactor6,-depth6);
+				point = getRealWorldCoordinates(x,y,depth1);
+				point2 = getRealWorldCoordinates(x+1,y,depth2);
+				point3 = getRealWorldCoordinates(x,y+1,depth3);
+				point4 = getRealWorldCoordinates(x+1,y+1,depth4);
+				point5 = getRealWorldCoordinates(x+2,y,depth5);
+				point6 = getRealWorldCoordinates(x+2,y+1,depth6);
 			}else{
 				point.set(x,y,-depth1);
 				point2.set((x+1),(y),-depth2);

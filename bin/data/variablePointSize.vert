@@ -7,12 +7,24 @@ uniform float minDistance;
 uniform float scaleFactor;
 
 const float PI = 3.14159265;
+const float fx_d = 1.0 / 5.9421434211923247e+02;
+const float fy_d = 1.0 / 5.9104053696870778e+02;
+const float cx_d = 3.3930780975300314e+02;
+const float cy_d = 2.4273913761751615e+02;
 
 void main() {
 	gl_TexCoord[0] = gl_MultiTexCoord0;
 	// get the homogeneous 2d position
-	float depthFactor = (-gl_Vertex.z + minDistance)*scaleFactor;
-	gl_Position = gl_ModelViewProjectionMatrix * vec4((gl_Vertex.x-320.)*depthFactor,(gl_Vertex.y-240.)*depthFactor,gl_Vertex.z,gl_Vertex.w);
+	
+	
+	vec4 result;
+	//float depth = -gl_Vertex.z/100.0;
+	result.x = float((gl_Vertex.x - cx_d) * -gl_Vertex.z * fx_d);
+	result.y = float((gl_Vertex.y - cy_d) * -gl_Vertex.z * fy_d);
+	result.z = gl_Vertex.z;
+	result.w = gl_Vertex.w;
+	//float depthFactor = (-gl_Vertex.z + minDistance)*scaleFactor;
+	gl_Position = gl_ModelViewProjectionMatrix * result;//vec4((gl_Vertex.x-320.)*depthFactor,(gl_Vertex.y-240.)*depthFactor,gl_Vertex.z,gl_Vertex.w);
 	
 	// use the distance from the camera and aperture to determine the radius
 	// the +1. is because point sizes <1 are rendered differently than those >1

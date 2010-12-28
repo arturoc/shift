@@ -53,9 +53,7 @@ void PCRenderer::update(float * vertexes, int w,int h){
 			if(depth==0 || depth>depthThreshold) continue;
 
 			if(useDepthFactor && !dof){ // the dof shader automatically does the depthFactor conversion
-				depthFactor = getDepthFactor(depth);
-				point.set((x-halfW)*depthFactor,(y-halfH)*depthFactor,-depth);
-				point.set(x,y,-depth);
+				point = getRealWorldCoordinates(x,y,depth);
 			}else{
 				point.set(x,y,-depth);
 			}

@@ -42,6 +42,8 @@ void testApp::setup(){
 	translateX=0;
 	translateY=0;
 
+	showRGB=false;
+
 	gui.init("");
 	gui.addTab("3d camera");
 	//ofAddListener(gui.addSpinSlider("camera y:",640,-640,640).floatEvent,this,&testApp::cameraYChanged);
@@ -74,6 +76,7 @@ void testApp::setup(){
 	gui.addToggle("show contour",&showContour);
 	gui.addToggle("show depth",&showDepth);
 	gui.addToggle("show clipPlanes",&showClipPlanes);
+	gui.addToggle("show rgb",&showRGB);
 
 
 	gray = 255;
@@ -87,7 +90,7 @@ void testApp::setup(){
 	gui.addToggle("textured points",&texPoints);
 	gui.addSpinSlider("minDistance",&minDistance,0,-100,1);
 	gui.addSpinSlider("scaleFactor",&scaleFactor,0,.01,.001);
-	gui.addToggle("use depth factor",&useDepthFactor);
+	gui.addToggle("real world coords",&useDepthFactor);
 	gui.addToggle("depth of field",&pc_renderer.dof);
 
 	gui.addSpinSlider("focusDistance", &pc_renderer.focusDistance, 0, 2000);
@@ -163,7 +166,7 @@ void testApp::draw(){
 
 		ofTranslate(0,0,translateZ);
 
-		if(useDepthFactor){
+		if(useDepthFactor || pc_renderer.dof){
 			ofScale(2,2,1);
 			ofTranslate(translateX,translateY);
 		}
@@ -190,8 +193,13 @@ void testApp::draw(){
 	//ofViewport(0,0,ofGetWidth(),ofGetHeight());
 	fbo.draw(ofGetWidth()-fbo.getWidth(),0);
 
+	ofNoFill();
 	if(showDepth){
 		cvdepth.draw(ofGetWidth()-320,ofGetHeight()-240,320,240);
+		ofRect(ofGetWidth()-320,ofGetHeight()-240,320,240);
+	}
+	if(showRGB){
+		kinect.draw(ofGetWidth()-320,ofGetHeight()-240,320,240);
 		ofRect(ofGetWidth()-320,ofGetHeight()-240,320,240);
 	}
 

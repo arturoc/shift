@@ -7,7 +7,6 @@
 
 #include "ofxThread.h"
 #include "ofxVectorMath.h"
-
 #include "of3DVideo.h"
 
 #include <libusb.h>
@@ -42,12 +41,15 @@ class ofxKinect : public of3DVideo, protected ofxThread{
 	
 		float getDistanceAt(int x, int y);
 		float getDistanceAt(const ofPoint & p);
+		
+		/// calculates the coordinate in the world for the pixel (perspective calculation). Center  of image is (0.0)
+		ofxPoint3f getWorldCoordinateFor(int x, int y);
 
 		ofColor	getColorAt(int x, int y);
 		ofColor getColorAt(const ofPoint & p);
 
 		ofColor getCalibratedColorAt(int x, int y);
-		ofColor getCalibratedColorAt(const ofPoint & p);
+		ofColor getCalibratedColorAt(const ofPoint & p);		
 
 		ofxMatrix4x4 getRGBDepthMatrix();
 		void setRGBDepthMatrix(const ofxMatrix4x4 & matrix);
@@ -118,6 +120,12 @@ class ofxKinect : public of3DVideo, protected ofxThread{
         
 		float targetTiltAngleDeg;
 		bool bTiltNeedsApplying;
+	
+		static void calculateLookups();
+		static bool lookupsCalculated;
+		static float distancePixelsLookup[2048];
+		static unsigned char depthPixelsLookupNearWhite[2048];
+		static unsigned char depthPixelsLookupFarWhite[2048];
 		
     private:
 
