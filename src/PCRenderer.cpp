@@ -37,7 +37,6 @@ void PCRenderer::update(float * vertexes, int w,int h){
 	/// 125
 	/// 346
 	float depth;
-	float depthFactor;
 	ofPoint point;
 
 	for(int y=0; y<h; y+=oneInY){
@@ -70,7 +69,6 @@ void PCRenderer::update(float * vertexes, unsigned char* rgb, int w,int h){
 	/// 125
 	/// 346
 	float depth;
-	float depthFactor;
 	unsigned char r,g,b;
 	ofPoint point;
 
@@ -131,10 +129,8 @@ void PCRenderer::draw(ofTexture * tex){
 		glAlphaFunc(GL_GREATER, 0);
 
 		// super helpful: http://pmviewer.sourceforge.net/method.php
-		//glEnable(GL_POINT_SMOOTH);
+		glEnable(GL_POINT_SMOOTH);
 		glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
-
-
 
 		//glVertexAttribPointerARB(sizeLoc, 1, GL_FLOAT, 0, 0, &pointSizes[0]);
 
@@ -147,6 +143,8 @@ void PCRenderer::draw(ofTexture * tex){
 		shader.end();
 		//if(tex) tex->unbind();
 	}else{
+		glEnable(GL_DEPTH_TEST);
+		//glEnable(GL_POINT_SMOOTH);
 		va.draw(GL_POINTS,tex);
 	}
 }

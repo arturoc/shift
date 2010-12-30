@@ -77,6 +77,17 @@ void KinectPlayer::draw(float x, float y, float w, float h){
 	tex.draw(x,y,w,h);
 }
 
+//----------------------------------------------------------
+void KinectPlayer::draw(const ofPoint & point){
+	draw(point.x, point.y);
+}
+
+//----------------------------------------------------------
+void KinectPlayer::draw(const ofRectangle & rect){
+	draw(rect.x, rect.y, rect.width, rect.height);
+}
+
+
 unsigned char * KinectPlayer::getPixels(){
 	return rgb;
 }

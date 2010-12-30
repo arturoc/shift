@@ -37,6 +37,8 @@ void testApp::setup(){
 	ofDisableArbTex();
 	pointTex.loadImage("point.png");
 
+	ofEnableArbTex();
+
 	texPoints = false;
 
 	translateX=0;
@@ -71,6 +73,10 @@ void testApp::setup(){
 	gui.addTab("kinect");
 	ofAddListener(gui.addToggle("video/live",false).boolEvent,this,&testApp::liveVideoChanged);
 	ofAddListener(gui.addSpinSlider("tilt",0,-30,30,1).floatEvent,this,&testApp::tiltChanged);
+	gui.addSpinSlider("cx_rgb",&(ofxKinect::cx_rgb),300.,340.,1);
+	gui.addSpinSlider("cy_rgb",&(ofxKinect::cy_rgb),240.,280.,1);
+	gui.addSpinSlider("cx_depth",&(ofxKinect::cx_d),300.,380.,1);
+	gui.addSpinSlider("cy_depth",&(ofxKinect::cy_d),240.,280.,1);
 
 	gui.addTab("view");
 	gui.addToggle("show contour",&showContour);
@@ -132,7 +138,8 @@ void testApp::update(){
 		mesh_renderer.minDistance = minDistance;
 		mesh_renderer.scaleFactor = scaleFactor;
 		mesh_renderer.useDepthFactor = useDepthFactor;
-		mesh_renderer.update(source->getDistancePixels(),640,480);
+		//mesh_renderer.update(source->getDistancePixels(),source->getCalibratedRGBPixels(),640,480);
+		mesh_renderer.updateWithTexture(source->getDistancePixels(),640,480);
 	}else{
 		pc_renderer.depthThreshold = depthThreshold;
 		pc_renderer.minDistance = minDistance;
@@ -172,7 +179,7 @@ void testApp::draw(){
 		ofTranslate(0,0,translateZ);
 
 		if(useDepthFactor || pc_renderer.dof){
-			ofScale(2,2,1);
+			ofScale(2,2,2);
 			ofTranslate(translateX,translateY);
 		}
 
@@ -181,7 +188,7 @@ void testApp::draw(){
 		else if(!mesh)
 			pc_renderer.draw();
 		else
-			mesh_renderer.draw();
+			mesh_renderer.draw(&source->getTextureReference());
 
 		if(showClipPlanes){
 			ofSetColor(255,0,0);

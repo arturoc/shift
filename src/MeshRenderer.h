@@ -19,6 +19,7 @@ public:
 	void setup();
 
 	void update(float * vertexes, int w,int h);
+	void updateWithTexture(float * vertexes, int w,int h);
 	void update(float * vertexes, unsigned char* rgb, int w,int h);
 	void draw(ofTexture * tex=NULL);
 

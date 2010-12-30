@@ -20,6 +20,8 @@ public:
 	void update();
 	void draw(float x, float y);
 	void draw(float , float y, float w, float h);
+	void draw(const ofPoint & point);
+	void draw(const ofRectangle & rect);
 
 	ofTexture & getTextureReference();
 	void setUseTexture(bool bUseTexture);

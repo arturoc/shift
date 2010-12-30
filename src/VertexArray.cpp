@@ -27,6 +27,12 @@ void VertexArray::addVertex(float x, float y, float z, unsigned char r, unsigned
 	colorVertexes = true;
 }
 
+void VertexArray::addVertex(float x, float y, float z, float u, float v){
+	ComplexVertex vertex = {x,y,z,u,v,255,255,255};
+	addVertex(vertex);
+	texVertexes = true;
+}
+
 void VertexArray::addVertex(float x, float y, float z, float u, float v, unsigned char r, unsigned char g, unsigned char b){
 	ComplexVertex vertex = {x,y,z,u,v,r,g,b};
 	addVertex(vertex);
@@ -38,8 +44,20 @@ void VertexArray::addVertex(const ofPoint & vertex){
 	addVertex(vertex.x,vertex.y,vertex.z);
 }
 
+void VertexArray::addVertex(const ofPoint & vertex, const ofColor & color){
+	addVertex(vertex.x,vertex.y,vertex.z,color.r,color.g,color.b);
+}
+
 void VertexArray::addVertex(const ofPoint & vertex, unsigned char r, unsigned char g, unsigned char b){
 	addVertex(vertex.x,vertex.y,vertex.z,r,g,b);
+}
+
+void VertexArray::addVertex(const ofPoint & vertex, float u, float v){
+	addVertex(vertex.x,vertex.y,vertex.z,u,v);
+}
+
+void VertexArray::addVertex(const ofPoint & vertex, const ofPoint & texCoord){
+	addVertex(vertex.x,vertex.y,vertex.z,texCoord.x,texCoord.y);
 }
 
 void VertexArray::addVertex(const ComplexVertex & vertex){
@@ -85,7 +103,7 @@ void VertexArray::draw(GLenum drawType,ofTexture * tex){
 			glColorPointer(3,GL_UNSIGNED_BYTE,sizeof(ComplexVertex),&vertexes[0].r);
 		}
 		if(texVertexes){
-			//TODO: enable texture coords array
+			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 			glTexCoordPointer(2,GL_FLOAT,sizeof(ComplexVertex),&vertexes[0].u);
 		}
 		glDrawArrays(drawType, 0, vertexes.size());
@@ -96,7 +114,7 @@ void VertexArray::draw(GLenum drawType,ofTexture * tex){
 		glDisableClientState(GL_COLOR_ARRAY);
 	}
 	if(texVertexes){
-		//TODO: disable texture coords array
+		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	}
 
 		//glEnableClientState(GL_POINT_SIZE_ARRAY_OES);
