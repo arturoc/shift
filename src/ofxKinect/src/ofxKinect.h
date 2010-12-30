@@ -95,12 +95,25 @@ class ofxKinect : public of3DVideo, protected ofxThread{
 		void 			setUseTexture(bool bUse);
 		void 			draw(float x, float y, float w, float h);
 		void 			draw(float x, float y);
+		void			draw(const ofPoint & point);
+		void			draw(const ofRectangle & rect);
 		
 		void 			drawDepth(float x, float y, float w, float h);
 		void 			drawDepth(float x, float y);
+		void			drawDepth(const ofPoint & point);
+		void			drawDepth(const ofRectangle & rect);
 
 		const static int	width = 640;
 		const static int	height = 480;
+
+		static double fx_d;
+		static double fy_d;
+		static float cx_d;
+		static float cy_d;
+		static double fx_rgb;
+		static double fy_rgb;
+		static float cx_rgb;
+		static float cy_rgb;
 
 	protected:
 
@@ -129,6 +142,9 @@ class ofxKinect : public of3DVideo, protected ofxThread{
 		static unsigned char depthPixelsLookupNearWhite[2048];
 		static unsigned char depthPixelsLookupFarWhite[2048];
 		
+
+
+
     private:
 
 		freenect_context *	kinectContext;	// kinect context handle
@@ -154,16 +170,7 @@ class ofxKinect : public of3DVideo, protected ofxThread{
 		// thread function
 		void threadedFunction();
 
-
-		static const double fx_d = 1.0 / 5.9421434211923247e+02;
-		static const double fy_d = 1.0 / 5.9104053696870778e+02;
-		static const double cx_d = 3.3930780975300314e+02;
-		static const double cy_d = 2.4273913761751615e+02;
-		static const double fx_rgb = 5.2921508098293293e+02;
-		static const double fy_rgb = 5.2556393630057437e+02;
-		static const double cx_rgb = 3.2894272028759258e+02;
-		static const double cy_rgb = 2.6748068171871557e+02;
 		ofxVec3f T_rgb;
-		ofxMatrix3x3 R_rgb;
+		ofxMatrix4x4 R_rgb;
 };
 
