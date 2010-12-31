@@ -89,15 +89,17 @@ void testApp::setup(){
 	alpha = 255;
 	psize = 1;
 	gui.addTab("render");
-	gui.addToggle("draw mesh", &mesh);
 	gui.addSpinSlider("gray",&gray,0,255,1);
 	gui.addSpinSlider("alpha",&alpha,0,255,1);
 	gui.addSpinSlider("p. size",&psize,0,64,1);
 	gui.addToggle("textured points",&texPoints);
 	gui.addSpinSlider("minDistance",&minDistance,0,-100,1);
 	gui.addSpinSlider("scaleFactor",&scaleFactor,0,.01,.001);
+	gui.addToggle("draw mesh", &mesh);
 	gui.addToggle("real world coords",&useDepthFactor);
 	gui.addToggle("depth of field",&pc_renderer.dof);
+	gui.addToggle("color",&color);
+	gui.addToggle("depth to gray",&pc_renderer.depthToGray);
 
 	gui.addSpinSlider("focusDistance", &pc_renderer.focusDistance, 0, 2000);
 	gui.addSpinSlider("aperture", &pc_renderer.aperture, 0, .1, .001);
@@ -117,7 +119,7 @@ void testApp::setup(){
 
 	//ofAddListener(cameraPosSlider.floatEvent,this,&testApp::cameraPosChanged);
 	//ofAddListener(cameraLookAtSlider.floatEvent,this,&testApp::cameraLookAtChanged);
-
+	glDisable(GL_LIGHTING);
 }
 
 //--------------------------------------------------------------
@@ -135,17 +137,16 @@ void testApp::update(){
 
 	if(mesh){
 		mesh_renderer.depthThreshold = depthThreshold;
-		mesh_renderer.minDistance = minDistance;
-		mesh_renderer.scaleFactor = scaleFactor;
 		mesh_renderer.useDepthFactor = useDepthFactor;
 		//mesh_renderer.update(source->getDistancePixels(),source->getCalibratedRGBPixels(),640,480);
 		mesh_renderer.updateWithTexture(source->getDistancePixels(),640,480);
 	}else{
 		pc_renderer.depthThreshold = depthThreshold;
-		pc_renderer.minDistance = minDistance;
-		pc_renderer.scaleFactor = scaleFactor;
 		pc_renderer.useDepthFactor = useDepthFactor;
-		pc_renderer.update(source->getDistancePixels(),source->getCalibratedRGBPixels(),640,480);
+		if(color)
+			pc_renderer.update(source->getDistancePixels(),source->getCalibratedRGBPixels(),640,480);
+		else
+			pc_renderer.update(source->getDistancePixels(),640,480);
 	}
 	if(showRGB && source==(of3DVideo*)&kinect){
 		//texRGBCalibrated.loadData(kinect.getCalibratedRGBPixels(),640,480,GL_RGB);
@@ -187,8 +188,12 @@ void testApp::draw(){
 			pc_renderer.draw(&pointTex.getTextureReference());
 		else if(!mesh)
 			pc_renderer.draw();
-		else
+		else if(color)
 			mesh_renderer.draw(&source->getTextureReference());
+		else if(pc_renderer.depthToGray)
+			mesh_renderer.draw(&source->getDepthTextureReference());
+		else
+			mesh_renderer.draw();
 
 		if(showClipPlanes){
 			ofSetColor(255,0,0);

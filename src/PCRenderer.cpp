@@ -56,8 +56,12 @@ void PCRenderer::update(float * vertexes, int w,int h){
 			}else{
 				point.set(x,y,-depth);
 			}
-
-			va.addVertex(point);
+			if(depthToGray && !dof){
+				unsigned char gray = 255-ofMap(depth,0,depthThreshold,0,255);
+				va.addVertex(point,ofColor(gray,gray,gray));
+			}else{
+				va.addVertex(point);
+			}
 		}
 		vertexes += (oneInY-1)*w;
 	}
@@ -114,7 +118,8 @@ void PCRenderer::draw(ofTexture * tex){
 		shader.setUniform1f("pointBrightness", pointBrightness);
 		shader.setUniform1f("rgbBrightness",  rgbBrightness);
 		shader.setUniform1f("maxPointSize", maxPointSize);
-
+		shader.setUniform1i("depthToGray", depthToGray);
+		shader.setUniform1f("invDepthThres", 1./depthThreshold);
 		//sizeLoc = shader.getAttributeLocation("particleSize");
 		//glEnableVertexAttribArrayARB(sizeLoc);
 		//glBindAttribLocationARB(shader.getProgram(), sizeLoc, "particleSize");

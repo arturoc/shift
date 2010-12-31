@@ -17,24 +17,24 @@ VertexArray::~VertexArray() {
 }
 
 void VertexArray::addVertex(float x, float y, float z){
-	ComplexVertex vertex = {x,y,z,0,0,255,255,255};
+	ComplexVertex vertex = {0,0,255,255,255,255,x,y,z};
 	addVertex(vertex);
 }
 
 void VertexArray::addVertex(float x, float y, float z, unsigned char r, unsigned char g, unsigned char b){
-	ComplexVertex vertex = {x,y,z,0.f,0.f,r,g,b};
+	ComplexVertex vertex = {0.f,0.f,r,g,b,255,x,y,z};
 	addVertex(vertex);
 	colorVertexes = true;
 }
 
 void VertexArray::addVertex(float x, float y, float z, float u, float v){
-	ComplexVertex vertex = {x,y,z,u,v,255,255,255};
+	ComplexVertex vertex = {u,v,255,255,255,255,x,y,z};
 	addVertex(vertex);
 	texVertexes = true;
 }
 
 void VertexArray::addVertex(float x, float y, float z, float u, float v, unsigned char r, unsigned char g, unsigned char b){
-	ComplexVertex vertex = {x,y,z,u,v,r,g,b};
+	ComplexVertex vertex = {u,v,r,g,b,255,x,y,z};
 	addVertex(vertex);
 	colorVertexes = true;
 	texVertexes = true;
@@ -106,6 +106,15 @@ void VertexArray::draw(GLenum drawType,ofTexture * tex){
 			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 			glTexCoordPointer(2,GL_FLOAT,sizeof(ComplexVertex),&vertexes[0].u);
 		}
+		/*GLenum format=GL_T2F_C4UB_V3F;
+		if(colorVertexes && texVertexes){
+			format = GL_T2F_C4UB_V3F;
+		}else if(colorVertexes){
+			format = GL_T2F_C4UB_V3F;
+		}else if(texVertexes){
+			format = GL_T2F_V3F;
+		}
+		glInterleavedArrays(format,sizeof(ComplexVertex),&vertexes[0].u);*/
 		glDrawArrays(drawType, 0, vertexes.size());
 	}
 

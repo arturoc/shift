@@ -77,6 +77,8 @@ class testApp : public ofBaseApp{
 
 		bool texPoints;
 		bool mesh;
+		bool color;
+		bool depthToGray;
 
 		float depthThreshold,minDistance,scaleFactor;
 		bool useDepthFactor;

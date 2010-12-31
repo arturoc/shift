@@ -32,8 +32,6 @@ public:
 			  0.					, 0.					,  0.					 , 1)*/
 	{
 		depthThreshold 	= 1000;
-		minDistance 	= -10;
-		scaleFactor 	= .0021;
 		useDepthFactor  = true;
 		width = 640;
 		height = 480;
@@ -77,10 +75,9 @@ public:
 
 
 	float depthThreshold;
-	float minDistance;
-	float scaleFactor;
 	bool  useDepthFactor;
 	float width, height;
+	bool depthToGray;
 
 protected:
 	float halfW, halfH;

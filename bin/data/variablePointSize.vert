@@ -3,14 +3,15 @@ uniform float aperture;
 uniform float pointBrightness;
 uniform float rgbBrightness;
 uniform float maxPointSize;
-uniform float minDistance;
-uniform float scaleFactor;
+uniform int depthToGray;
+uniform float invDepthThres;
 
 const float PI = 3.14159265;
 const float fx_d = 1.0 / 5.9421434211923247e+02;
 const float fy_d = 1.0 / 5.9104053696870778e+02;
 const float cx_d = 3.3930780975300314e+02;
 const float cy_d = 2.4273913761751615e+02;
+
 
 void main() {
 	gl_TexCoord[0] = gl_MultiTexCoord0;
@@ -30,10 +31,13 @@ void main() {
 	// the +1. is because point sizes <1 are rendered differently than those >1
 	
 	float size = min(abs(gl_Position.z - focusDistance) * aperture + 1.,maxPointSize);
-	gl_PointSize = size*4.;
+	gl_PointSize = size*8.;
 	
-	
-	gl_FrontColor = gl_Color;
+	if(depthToGray){
+		gl_FrontColor = gl_Color * (1.-abs(gl_Position.z*invDepthThres));
+	}else{
+		gl_FrontColor = gl_Color;
+	}
 	//float radius = size / 2.;
 	// divide the color alpha by the area
 	//gl_FrontColor.a /= PI * radius * radius;

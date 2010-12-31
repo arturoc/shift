@@ -24,6 +24,7 @@ public:
 	void draw(const ofRectangle & rect);
 
 	ofTexture & getTextureReference();
+	ofTexture & getDepthTextureReference();
 	void setUseTexture(bool bUseTexture);
 
 	float getHeight();

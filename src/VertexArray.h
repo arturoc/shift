@@ -11,9 +11,9 @@
 #include "ofMain.h"
 
 struct ComplexVertex{
-	float x,y,z;
 	float u,v;
-	unsigned char r,g,b;
+	unsigned char r,g,b,a;
+	float x,y,z;
 };
 
 class VertexArray {

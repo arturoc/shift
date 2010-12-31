@@ -109,6 +109,10 @@ ofTexture & KinectPlayer::getTextureReference(){
 	return tex;
 }
 
+ofTexture & KinectPlayer::getDepthTextureReference(){
+	return tex;
+}
+
 float KinectPlayer::getHeight(){
 	return 480;
 }
