@@ -78,6 +78,7 @@ public:
 	bool  useDepthFactor;
 	float width, height;
 	bool depthToGray;
+	int minimumGray;
 
 protected:
 	float halfW, halfH;

@@ -100,6 +100,7 @@ void testApp::setup(){
 	gui.addToggle("depth of field",&pc_renderer.dof);
 	gui.addToggle("color",&color);
 	gui.addToggle("depth to gray",&pc_renderer.depthToGray);
+	gui.addSpinSlider("min. gray", &pc_renderer.minimumGray, 0, 255);
 
 	gui.addSpinSlider("focusDistance", &pc_renderer.focusDistance, 0, 2000);
 	gui.addSpinSlider("aperture", &pc_renderer.aperture, 0, .1, .001);

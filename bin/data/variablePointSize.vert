@@ -5,6 +5,7 @@ uniform float rgbBrightness;
 uniform float maxPointSize;
 uniform int depthToGray;
 uniform float invDepthThres;
+uniform float minimumGray;
 
 const float PI = 3.14159265;
 const float fx_d = 1.0 / 5.9421434211923247e+02;
@@ -34,7 +35,7 @@ void main() {
 	gl_PointSize = size*8.;
 	
 	if(depthToGray){
-		gl_FrontColor = gl_Color * (1.-abs(gl_Position.z*invDepthThres));
+		gl_FrontColor = gl_Color * minimumGray + 1.-clamp(abs(gl_Position.z*invDepthThres),0,1);
 	}else{
 		gl_FrontColor = gl_Color;
 	}
