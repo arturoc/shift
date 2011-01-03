@@ -74,10 +74,6 @@ void testApp::setup(){
 	gui.addTab("kinect");
 	ofAddListener(gui.addToggle("video/live",false).boolEvent,this,&testApp::liveVideoChanged);
 	ofAddListener(gui.addSpinSlider("tilt",0,-30,30,1).floatEvent,this,&testApp::tiltChanged);
-	gui.addSpinSlider("cx_rgb",&(ofxKinect::cx_rgb),300.,340.,1);
-	gui.addSpinSlider("cy_rgb",&(ofxKinect::cy_rgb),240.,280.,1);
-	gui.addSpinSlider("cx_depth",&(ofxKinect::cx_d),300.,380.,1);
-	gui.addSpinSlider("cy_depth",&(ofxKinect::cy_d),240.,280.,1);
 	gui.addSpinSlider("player fps",&kPlayer.fps,0,60,1);
 	ofAddListener(gui.addToggle("record",false).boolEvent,this,&testApp::recordChanged);
 
@@ -152,10 +148,10 @@ void testApp::update(){
 		else
 			pc_renderer.update(source->getDistancePixels(),640,480);
 	}
-	if(showRGB && source==(of3DVideo*)&kinect){
+	if(showRGB && source==(ofxBase3DVideo*)&kinect){
 		//texRGBCalibrated.loadData(kinect.getCalibratedRGBPixels(),640,480,GL_RGB);
 	}
-	if(recorder.isOpened() && source==(of3DVideo*)&kinect){
+	if(recorder.isOpened() && source==(ofxBase3DVideo*)&kinect){
 		recorder.newFrame(kinect.getPixels(),kinect.getRawDepthPixels());
 	}
 }

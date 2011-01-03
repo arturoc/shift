@@ -6,21 +6,19 @@
 #include "ofxVectorMath.h"
 #include "ofxKinect.h"
 #include "ofxWidgets.h"
-#include "KinectPlayer.h"
+#include "ofxKinectPlayer.h"
 #include "PCRenderer.h"
 #include "MeshRenderer.h"
 #include "ofx3DUtils.h"
 #include "ofxOpenCv.h"
 #include "ofxFbo.h"
-#include "of3DVideo.h"
-#include "KinectRecorder.h"
+#include "ofxBase3DVideo.h"
+#include "ofxKinectRecorder.h"
 
 class testApp : public ofBaseApp{
 
 	public:
 		testApp(){}
-		//:cameraPosSlider("CAMERA_POSITION")
-		//,cameraLookAtSlider("CAMERA_LOOKAT"){}
 		void setup();
 		void update();
 		void draw();
@@ -42,9 +40,9 @@ class testApp : public ofBaseApp{
 		void tiltChanged(float & tilt);
 		void recordChanged(bool & pressed);
 
-		KinectPlayer kPlayer;
+		ofxKinectPlayer kPlayer;
 		ofxKinect	 kinect;
-		of3DVideo * source;
+		ofxBase3DVideo * source;
 
 		PCRenderer pc_renderer;
 		MeshRenderer mesh_renderer;
@@ -87,7 +85,7 @@ class testApp : public ofBaseApp{
 
 		ofTexture texRGBCalibrated;
 
-		KinectRecorder recorder;
+		ofxKinectRecorder recorder;
 };
 
 #endif
