@@ -5,15 +5,15 @@
 #include "ofGraphics.h"
 #include "ofTypes.h"
 
-#include "of3DVideo.h"
+#include "ofxBase3DVideo.h"
 
 #include "ofxThread.h"
-#include "ofxVectorMath.h"
 
 #include <libusb.h>
 #include "libfreenect.h"
+#include "ofxKinectCalibration.h"
 
-class ofxKinect : public of3DVideo, protected ofxThread{
+class ofxKinect : public ofxBase3DVideo, protected ofxThread{
 
 	public :
 
@@ -45,7 +45,6 @@ class ofxKinect : public of3DVideo, protected ofxThread{
 		
 		/// calculates the coordinate in the world for the pixel (perspective calculation). Center  of image is (0.0)
 		ofxPoint3f getWorldCoordinateFor(int x, int y);
-		ofxPoint3f getWorldCoordinateFor(int x, int y, float z);
 
 		ofColor	getColorAt(int x, int y);
 		ofColor getColorAt(const ofPoint & p);
@@ -106,15 +105,6 @@ class ofxKinect : public of3DVideo, protected ofxThread{
 		const static int	width = 640;
 		const static int	height = 480;
 
-		static double fx_d;
-		static double fy_d;
-		static float cx_d;
-		static float cy_d;
-		static double fx_rgb;
-		static double fy_rgb;
-		static float cx_rgb;
-		static float cy_rgb;
-
 	protected:
 
 		bool					bUseTexture;
@@ -123,27 +113,15 @@ class ofxKinect : public of3DVideo, protected ofxThread{
 		bool 					bVerbose;
 		bool 					bGrabberInited;
 		
-		unsigned char *			depthPixels;
 		unsigned char *			videoPixels;
-		unsigned char *			calibratedRGBPixels;
-		
 		unsigned short *		depthPixelsRaw;
-		float * 				distancePixels;
 		
 		ofPoint rawAccel;
 		ofPoint mksAccel;
         
 		float targetTiltAngleDeg;
 		bool bTiltNeedsApplying;
-	
-		static void calculateLookups();
-		static bool lookupsCalculated;
-		static float distancePixelsLookup[2048];
-		static unsigned char depthPixelsLookupNearWhite[2048];
-		static unsigned char depthPixelsLookupFarWhite[2048];
 		
-
-
 
     private:
 
@@ -155,10 +133,6 @@ class ofxKinect : public of3DVideo, protected ofxThread{
 		
 		bool bNeedsUpdate;
 		bool bUpdateTex;
-		
-		bool bDepthNearValueWhite;
-		
-		//ofxMatrix4x4		rgbDepthMatrix;
 
 		bool				bInfrared;
 		int					bytespp;
@@ -170,7 +144,6 @@ class ofxKinect : public of3DVideo, protected ofxThread{
 		// thread function
 		void threadedFunction();
 
-		ofxVec3f T_rgb;
-		ofxMatrix4x4 R_rgb;
+		ofxKinectCalibration calibration;
 };
 
