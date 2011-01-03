@@ -136,6 +136,7 @@ void PCRenderer::draw(ofTexture * tex){
 
 		// super helpful: http://pmviewer.sourceforge.net/method.php
 		glEnable(GL_POINT_SMOOTH);
+		glHint(GL_POINT_SMOOTH_HINT,GL_NICEST);
 		glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
 
 		//glVertexAttribPointerARB(sizeLoc, 1, GL_FLOAT, 0, 0, &pointSizes[0]);
@@ -149,8 +150,13 @@ void PCRenderer::draw(ofTexture * tex){
 		shader.end();
 		//if(tex) tex->unbind();
 	}else{
-		glEnable(GL_DEPTH_TEST);
-		//glEnable(GL_POINT_SMOOTH);
+		//glEnable(GL_DEPTH_TEST);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+		glEnable(GL_ALPHA_TEST);
+		glAlphaFunc(GL_GREATER, 0);
+		glEnable(GL_POINT_SMOOTH);
+		glHint(GL_POINT_SMOOTH_HINT,GL_NICEST);
 		va.draw(GL_POINTS,tex);
 	}
 }

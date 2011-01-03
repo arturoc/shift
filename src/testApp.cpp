@@ -3,7 +3,8 @@
 
 //--------------------------------------------------------------
 void testApp::setup(){
-	ofSetFrameRate(30);
+	//ofSetFrameRate(30);
+	ofSetVerticalSync(true);
 	ofBackground(0,0,0);
 	ofSetColor(255,255,255);
 
@@ -22,7 +23,7 @@ void testApp::setup(){
 
 	source = &kPlayer;
 
-	kPlayer.setup("depth.bin");
+	kPlayer.setup("depth3-16-52-41.bin",true);
 	//camera.disableMouseEvents();
 	camera.position(0,0,0);
 	//cameraPosSlider.init("camera xz: ",0.f,0.f,-1000.f,1000.f,-1000.f,1000.f,"default");
@@ -77,6 +78,8 @@ void testApp::setup(){
 	gui.addSpinSlider("cy_rgb",&(ofxKinect::cy_rgb),240.,280.,1);
 	gui.addSpinSlider("cx_depth",&(ofxKinect::cx_d),300.,380.,1);
 	gui.addSpinSlider("cy_depth",&(ofxKinect::cy_d),240.,280.,1);
+	gui.addSpinSlider("player fps",&kPlayer.fps,0,60,1);
+	ofAddListener(gui.addToggle("record",false).boolEvent,this,&testApp::recordChanged);
 
 	gui.addTab("view");
 	gui.addToggle("show contour",&showContour);
@@ -152,6 +155,9 @@ void testApp::update(){
 	if(showRGB && source==(of3DVideo*)&kinect){
 		//texRGBCalibrated.loadData(kinect.getCalibratedRGBPixels(),640,480,GL_RGB);
 	}
+	if(recorder.isOpened() && source==(of3DVideo*)&kinect){
+		recorder.newFrame(kinect.getPixels(),kinect.getRawDepthPixels());
+	}
 }
 
 //--------------------------------------------------------------
@@ -176,10 +182,23 @@ void testApp::draw(){
 
 		ofTranslate(rot_axis);
 		ofRotate(rot,0,1,0);
+		if(showClipPlanes){
+			ofSetColor(255,0,0);
+			ofLine(0,0,0,ofGetHeight());
+		}
 		ofTranslate(-rot_axis);
 
 		ofTranslate(0,0,translateZ);
 
+		if(showClipPlanes){
+			ofPushMatrix();
+			ofSetColor(255,0,0);
+			ofTranslate(0,0,-nearClip);
+			ofRect(0,0,640,480);
+			ofTranslate(0,0,nearClip-depthThreshold);
+			ofRect(0,0,640,480);
+			ofPopMatrix();
+		}
 		if(useDepthFactor || pc_renderer.dof){
 			ofScale(2,2,2);
 			ofTranslate(translateX,translateY);
@@ -196,13 +215,6 @@ void testApp::draw(){
 		else
 			mesh_renderer.draw();
 
-		if(showClipPlanes){
-			ofSetColor(255,0,0);
-			ofTranslate(0,0,-nearClip);
-			ofRect(0,0,640,480);
-			ofTranslate(0,0,nearClip-depthThreshold);
-			ofRect(0,0,640,480);
-		}
 	ofPopMatrix();
 	fbo.end();
 
@@ -257,8 +269,17 @@ void testApp::liveVideoChanged(bool & pressed){
 		kinect.setCameraTiltAngle(tilt);
 		source = &kinect;
 	}else{
-		kPlayer.setup("depth.bin");
+		kPlayer.setup("depth3-16-56-54.bin",true);
 		source = &kPlayer;
+	}
+}
+
+//--------------------------------------------------------------
+void testApp::recordChanged(bool & pressed){
+	if(pressed){
+		recorder.init("depth"+ofToString(ofGetDay())+"-"+ofToString(ofGetHours())+"-"+ofToString(ofGetMinutes())+"-"+ofToString(ofGetSeconds())+".bin");
+	}else{
+		recorder.close();
 	}
 }
 

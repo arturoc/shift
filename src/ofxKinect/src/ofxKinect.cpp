@@ -17,6 +17,10 @@ double ofxKinect::fx_rgb = 5.2921508098293293e+02;
 double ofxKinect::fy_rgb = 5.2556393630057437e+02;
 float ofxKinect::cx_rgb = 3.2894272028759258e+02;
 float ofxKinect::cy_rgb = 2.6748068171871557e+02;
+/*double ofxKinect::fx_rgb = 5.11017181e+02;
+float ofxKinect::cx_rgb = 3.20916016e+02;
+double ofxKinect::fy_rgb = 5.10642212e+02;
+float ofxKinect::cy_rgb = 2.53051437e+02;*/
 
 ofxVec3f operator *(const ofxMatrix3x3 &m,const ofxVec3f &v)
   {
@@ -147,7 +151,7 @@ unsigned char	* ofxKinect::getDepthPixels(){
 
 //---------------------------------------------------------------------------
 unsigned short 	* ofxKinect::getRawDepthPixels(){
-	return depthPixelsRaw;
+	return depthPixelsBack;
 }
 
 //---------------------------------------------------------------------------
@@ -616,7 +620,7 @@ void ofxKinect::threadedFunction(){
 		freenect_get_mks_accel(tilt, &dx, &dy, &dz);
 		mksAccel.set(dx, dy, dz);
 		
-		ofSleepMillis(20);
+		ofSleepMillis(10);
 
 //		printf("\r raw acceleration: %4d %4d %4d  mks acceleration: %4f %4f %4f", ax, ay, az, dx, dy, dz);
 	}

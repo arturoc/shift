@@ -13,6 +13,7 @@
 #include "ofxOpenCv.h"
 #include "ofxFbo.h"
 #include "of3DVideo.h"
+#include "KinectRecorder.h"
 
 class testApp : public ofBaseApp{
 
@@ -39,6 +40,7 @@ class testApp : public ofBaseApp{
 
 		void liveVideoChanged(bool & pressed);
 		void tiltChanged(float & tilt);
+		void recordChanged(bool & pressed);
 
 		KinectPlayer kPlayer;
 		ofxKinect	 kinect;
@@ -84,6 +86,8 @@ class testApp : public ofBaseApp{
 		bool useDepthFactor;
 
 		ofTexture texRGBCalibrated;
+
+		KinectRecorder recorder;
 };
 
 #endif
