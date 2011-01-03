@@ -191,19 +191,19 @@ void testApp::draw(){
 		ofTranslate(0,0,translateZ);
 
 		if(showClipPlanes){
-			ofPushMatrix();
+		ofPushMatrix();
 			ofSetColor(255,0,0);
 			ofTranslate(0,0,-nearClip);
 			ofRect(0,0,640,480);
 			ofTranslate(0,0,nearClip-depthThreshold);
 			ofRect(0,0,640,480);
-			ofPopMatrix();
+		ofPopMatrix();
 		}
 		if(useDepthFactor || pc_renderer.dof){
 			ofScale(2,2,2);
 			ofTranslate(translateX,translateY);
 		}
-
+		ofSetColor(255,255,255);
 		if((texPoints || pc_renderer.dof) && !mesh)
 			pc_renderer.draw(&pointTex.getTextureReference());
 		else if(!mesh)
