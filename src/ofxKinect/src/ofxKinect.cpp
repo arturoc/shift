@@ -22,18 +22,6 @@ float ofxKinect::cx_rgb = 3.20916016e+02;
 double ofxKinect::fy_rgb = 5.10642212e+02;
 float ofxKinect::cy_rgb = 2.53051437e+02;*/
 
-ofxVec3f operator *(const ofxMatrix3x3 &m,const ofxVec3f &v)
-  {
-	ofxVec3f vv;
-
-    vv.x = v.x*m.a + v.y*m.b + v.z*m.c;
-    vv.y = v.x*m.d + v.y*m.e + v.z*m.f;
-    vv.z = v.x*m.g + v.y*m.h + v.z*m.i;
-
-    return vv;
-  }
-
-
 
 //--------------------------------------------------------------------
 ofxKinect::ofxKinect():
