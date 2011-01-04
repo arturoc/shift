@@ -36,9 +36,14 @@ class testApp : public ofBaseApp{
 		void cameraYChanged(float & pos);
 		void cameraLookAtYChanged(float & pos);
 
+		void fakeDOFChanged(float & fakeDOF);
+		void dramaticZoomChanged(float & zoom);
+
 		void liveVideoChanged(bool & pressed);
 		void tiltChanged(float & tilt);
 		void recordChanged(bool & pressed);
+
+		void toggleTwoScreens(bool & pressed);
 
 		ofxKinectPlayer kPlayer;
 		ofxKinect	 kinect;
@@ -50,6 +55,7 @@ class testApp : public ofBaseApp{
 		ofxCamera camera;
 
 		ofxWFrame gui;
+		ofxWFrame comp_gui;
 
 		ofxCvGrayscaleImage cvdepth;
 		ofxCvGrayscaleImage 	grayThresh;
@@ -66,14 +72,14 @@ class testApp : public ofBaseApp{
 		float   translateZ,translateX,translateY;
 		float	postTranslateZ;
 
-		bool showContour, showDepth, showClipPlanes, showRGB;
+		bool showContour, showDepth, showClipPlanes, showRGB, showStats;
 
 		ofxFbo fbo;
 
 		float tilt;
 		int gray,alpha,psize;
 
-		ofImage pointTex;
+		ofImage pointTex,bokehTex,gaussTex;
 
 		bool texPoints;
 		bool mesh;
@@ -86,6 +92,17 @@ class testApp : public ofBaseApp{
 		ofTexture texRGBCalibrated;
 
 		ofxKinectRecorder recorder;
+
+		float dramaticZoomFactor;
+
+		ofxWQuadWarp warp;
+		VertexArray vaWarp;
+		ofxMatrix4x4 homography;
+		ofPoint src[4],dst[4];
+		bool whiteScreen;
+
+		bool twoScreens;
+
 };
 
 #endif

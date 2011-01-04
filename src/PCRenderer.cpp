@@ -20,6 +20,7 @@ PCRenderer::PCRenderer() {
 	pointBrightness = 1;
 	rgbBrightness = 1;
 	maxPointSize = 30;
+	pointSizeFactor = 1;
 }
 
 PCRenderer::~PCRenderer() {
@@ -159,6 +160,7 @@ void PCRenderer::draw(ofTexture * tex){
 		shader.setUniform1i("depthToGray", depthToGray);
 		shader.setUniform1f("invDepthThres", 1./depthThreshold);
 		shader.setUniform1f("minimumGray",float(minimumGray)/255.f);
+		shader.setUniform1f("pointSizeFactor",pointSizeFactor);
 		//sizeLoc = shader.getAttributeLocation("particleSize");
 		//glEnableVertexAttribArrayARB(sizeLoc);
 		//glBindAttribLocationARB(shader.getProgram(), sizeLoc, "particleSize");

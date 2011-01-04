@@ -31,6 +31,7 @@ public:
 	float pointBrightness;
 	float rgbBrightness;
 	float maxPointSize;
+	float pointSizeFactor;
 
 private:
 	VertexArray va;
