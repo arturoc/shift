@@ -13,6 +13,7 @@ public:
 	virtual unsigned char 	* getDepthPixels()=0;		// grey scale values
 	virtual float* getDistancePixels()=0;
 	virtual unsigned char * getCalibratedRGBPixels()=0;
+	virtual ofPoint * getCalibratedTexCoords()=0;
 
 
 	virtual ofTexture &		getDepthTextureReference()=0;

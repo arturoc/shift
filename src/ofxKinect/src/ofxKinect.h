@@ -70,6 +70,7 @@ class ofxKinect : public ofxBase3DVideo, protected ofxThread{
 		
 		// get the rgb pixels corrected to match the depth frame
 		unsigned char * getCalibratedRGBPixels();
+		ofPoint * getCalibratedTexCoords();
 
 		/// get the distance in centimeters to a given point
 		float* getDistancePixels();

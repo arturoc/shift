@@ -71,6 +71,11 @@ unsigned char * ofxKinect::getCalibratedRGBPixels(){
 }
 
 //------------------------------------
+ofPoint * ofxKinect::getCalibratedTexCoords(){
+	return calibration.getCalibratedTexCoords();
+}
+
+//------------------------------------
 ofTexture & ofxKinect::getTextureReference(){
 	if(!videoTex.bAllocated()){
 		ofLog(OF_LOG_WARNING, "ofxKinect: getTextureReference - texture is not allocated");
@@ -277,7 +282,7 @@ ofColor ofxKinect::getCalibratedColorAt(int x, int y){
 
 //------------------------------------
 ofColor ofxKinect::getCalibratedColorAt(const ofPoint & p){
-	return getCalibratedColorAt(calibration.getCalibratedColorCoordAt(p));
+	return getCalibratedColorAt(calibration.getCalibratedColorCoordAt(p.x,p.y));
 }
 
 //------------------------------------

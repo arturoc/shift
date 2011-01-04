@@ -42,14 +42,26 @@ ofxKinectCalibration::ofxKinectCalibration():
 			0.00190475, 0.999996, -0.001865, 0,
 			0.017644, 0.00183111, 0.999843, 0,
 			0,0,0,1)
+	/*R_rgb(5.34866271e+02, 3.89654806e+00, 0.00000000e+00, 1.74704200e-02,
+        -4.70724694e+00, -5.28843603e+02, 0.00000000e+00, -1.22753400e-02,
+        -3.19670762e+02, -2.60999685e+02, 0.00000000e+00, -9.99772000e-01,
+        -6.98445586e+00, 3.31139785e+00, 0.00000000e+00, 1.09167360e-02)*/
 {
 	depthPixels				= NULL;
 	calibratedRGBPixels		= NULL;
 	distancePixels 			= NULL;
+	calibratedTexCoords		= NULL;
 	bDepthNearValueWhite	= false;
 	calculateLookups();
 	R_rgb.preMultTranslate(-T_rgb);
 	R_rgb = ofxMatrix4x4::getTransposedOf(R_rgb);
+	/*ofxMatrix4x4 rgb_camera(fx_rgb, 0, 0, 0,
+							0, fy_rgb, 0, 0,
+							0, 0, 0, 1,
+							fx_rgb/cx_rgb, fy_rgb/cy_rgb, 0, 1);
+	//rgb_camera *= R_rgb;
+	//R_rgb = rgb_camera;
+	R_rgb *= rgb_camera;*/
 }
 
 void ofxKinectCalibration::calculateLookups() {
@@ -86,6 +98,7 @@ void ofxKinectCalibration::init(int _bytespp){
 	depthPixels = new unsigned char[length];
 	distancePixels = new float[length];
 	calibratedRGBPixels = new unsigned char[length*bytespp];
+	calibratedTexCoords = new ofPoint[length];
 
 	memset(depthPixels, 0, length*sizeof(unsigned char));
 	memset(distancePixels, 0, length*sizeof(float));
@@ -97,6 +110,8 @@ void ofxKinectCalibration::clear(){
 	if(depthPixels != NULL){
 		delete[] depthPixels; depthPixels = NULL;
 		delete[] distancePixels; distancePixels = NULL;
+		delete[] calibratedRGBPixels; calibratedRGBPixels = NULL;
+		delete[] calibratedTexCoords; calibratedTexCoords = NULL;
 	}
 }
 
@@ -139,6 +154,8 @@ unsigned char * ofxKinectCalibration::getCalibratedRGBPixels(unsigned char * rgb
 				texcoord2d.x = ofClamp(round(texcoord3d.x * fx_rgb *invZ) + cx_rgb,0,639);
 				texcoord2d.y = ofClamp(round(texcoord3d.y * fy_rgb *invZ) + cy_rgb,0,479);
 
+				/*texcoord2d.x = ofClamp(round(texcoord3d.x),0,639);
+				texcoord2d.y = ofClamp(round(texcoord3d.y),0,479);*/
 				int pos = int(texcoord2d.y)*640*3+int(texcoord2d.x)*3;
 				*calibratedPixels++ = rgb[pos];
 				*calibratedPixels++ = rgb[pos+1];
@@ -153,6 +170,30 @@ unsigned char * ofxKinectCalibration::getCalibratedRGBPixels(unsigned char * rgb
 	return calibratedRGBPixels;
 }
 
+ofPoint * ofxKinectCalibration::getCalibratedTexCoords(){
+	//calibration method from:  http://nicolas.burrus.name/index.php/Research/KinectCalibration
+	static ofxVec3f texcoord3d;
+	ofPoint * _calibratedTexCoords = calibratedTexCoords;
+	float * _distancePixels = distancePixels;
+
+	for ( int y = 0; y < 480; y++) {
+		for ( int x = 0; x < 640; x++) {
+			texcoord3d = getWorldCoordinateFor(x,y,(*_distancePixels++)*.01);
+			if(texcoord3d.z){
+				texcoord3d = R_rgb * texcoord3d;
+				const float invZ = 1.0f / texcoord3d.z;
+				(*_calibratedTexCoords).x = int(ofClamp(round(texcoord3d.x * fx_rgb *invZ) + cx_rgb,0,639));
+				(*_calibratedTexCoords).y = int(ofClamp(round(texcoord3d.y * fy_rgb *invZ) + cy_rgb,0,479));
+			}else{
+				(*_calibratedTexCoords).x = 0;
+				(*_calibratedTexCoords).y = 0;
+			}
+			_calibratedTexCoords++;
+		}
+	}
+	return calibratedTexCoords;
+}
+
 unsigned char * ofxKinectCalibration::getDepthPixels(){
 	return depthPixels;
 }
@@ -162,18 +203,21 @@ float * ofxKinectCalibration::getDistancePixels(){
 }
 
 ofxPoint2f ofxKinectCalibration::getCalibratedColorCoordAt(int x, int y){
+	ofxPoint3f point = getWorldCoordinateFor(x,y);
+	return getCalibratedColorCoordAt(point.x,point.y,point.z);
+}
+
+ofxPoint2f ofxKinectCalibration::getCalibratedColorCoordAt(double x, double y, double z){
 	//calibration method from:  http://nicolas.burrus.name/index.php/Research/KinectCalibration
-	ofxVec3f texcoord3d;
+	ofxVec3f texcoord3d(x,y,z);
 	ofxVec2f texcoord2d;
-	texcoord3d = getWorldCoordinateFor(x,y);
 	texcoord3d = R_rgb * texcoord3d;
-	const float invZ = 1/ texcoord3d.z;
-	texcoord2d.x = ofClamp((texcoord3d.x * fx_rgb *invZ) + cx_rgb,0,640);
-	texcoord2d.y = ofClamp((texcoord3d.y * fy_rgb *invZ) + cy_rgb,0,480);
+	const float invZ = 1.0f / texcoord3d.z;
+	texcoord2d.x = int(ofClamp(round(texcoord3d.x * fx_rgb *invZ) + cx_rgb,0,639));
+	texcoord2d.y = int(ofClamp(round(texcoord3d.y * fy_rgb *invZ) + cy_rgb,0,479));
 
 	return texcoord2d;
 }
-
 
 float ofxKinectCalibration::getDistanceAt(int x, int y){
 	return distancePixels[y * width + x];
@@ -181,10 +225,6 @@ float ofxKinectCalibration::getDistanceAt(int x, int y){
 
 float ofxKinectCalibration::getDistanceAt(const ofPoint & p){
 	return getDistanceAt(p.x, p.y);
-}
-
-ofxPoint2f ofxKinectCalibration::getCalibratedColorCoordAt(const ofPoint & p){
-	return getCalibratedColorCoordAt(p.x,p.y);
 }
 
 ofxPoint3f ofxKinectCalibration::getWorldCoordinateFor(int x, int y){

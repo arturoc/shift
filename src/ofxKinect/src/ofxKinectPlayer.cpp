@@ -98,9 +98,13 @@ unsigned char * ofxKinectPlayer::getCalibratedRGBPixels(){
 	return calibration.getCalibratedRGBPixels(rgb);
 }
 
+ofPoint * ofxKinectPlayer::getCalibratedTexCoords(){
+	return calibration.getCalibratedTexCoords();
+}
+
 
 ofTexture & ofxKinectPlayer::getTextureReference(){
-	return depthTex;
+	return videoTex;
 }
 
 ofTexture & ofxKinectPlayer::getDepthTextureReference(){

@@ -31,7 +31,7 @@ public:
 
 
 	ofxPoint2f getCalibratedColorCoordAt(int x, int y);
-	ofxPoint2f getCalibratedColorCoordAt(const ofPoint & p);
+	ofxPoint2f getCalibratedColorCoordAt(double x, double y, double z);
 
 	/// calculates the coordinate in the world for the pixel (perspective calculation). Center  of image is (0.0)
 	ofxPoint3f getWorldCoordinateFor(int x, int y);
@@ -47,6 +47,7 @@ public:
 	float* getDistancePixels();
 	// get the rgb pixels corrected to match the depth frame
 	unsigned char * getCalibratedRGBPixels(unsigned char * rgb);
+	ofPoint * getCalibratedTexCoords();
 
 	const static int	width = 640;
 	const static int	height = 480;
@@ -71,6 +72,7 @@ private:
 	float * 				distancePixels;
 	unsigned char *			depthPixels;
 	unsigned char *			calibratedRGBPixels;
+	ofPoint *				calibratedTexCoords;
 
 	bool bDepthNearValueWhite;
 

@@ -43,6 +43,7 @@ public:
 	unsigned char * getDepthPixels();
 	float * getDistancePixels();
 	unsigned char * getCalibratedRGBPixels();
+	ofPoint * getCalibratedTexCoords();
 
 	float getDistanceAt(int x, int y) ;
 	ofxPoint3f getWorldCoordinateFor(int x, int y);
