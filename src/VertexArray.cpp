@@ -67,7 +67,7 @@ void VertexArray::addVertex(const ComplexVertex & vertex){
 void VertexArray::draw(GLenum drawType,ofTexture * tex){
 	glEnableClientState(GL_VERTEX_ARRAY);
 	if(tex!=NULL) tex->bind();
-	if(drawType==GL_POINTS && tex){
+	if(drawType==GL_POINTS && tex && !texVertexes){
 
 		//glEnable(texData.textureTarget);
 		/*glBindTexture( tex->texData.textureTarget, (GLuint)tex->texData.textureID);
@@ -102,7 +102,7 @@ void VertexArray::draw(GLenum drawType,ofTexture * tex){
 			glEnableClientState(GL_COLOR_ARRAY);
 			glColorPointer(3,GL_UNSIGNED_BYTE,sizeof(ComplexVertex),&vertexes[0].r);
 		}
-		if(texVertexes){
+		if(texVertexes && tex){
 			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 			glTexCoordPointer(2,GL_FLOAT,sizeof(ComplexVertex),&vertexes[0].u);
 		}
