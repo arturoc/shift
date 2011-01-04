@@ -23,7 +23,7 @@ void testApp::setup(){
 
 	source = &kPlayer;
 
-	kPlayer.setup("depth3-16-52-41.bin",true);
+	kPlayer.setup("depth.bin",true);
 	//camera.disableMouseEvents();
 	camera.position(0,0,0);
 	//cameraPosSlider.init("camera xz: ",0.f,0.f,-1000.f,1000.f,-1000.f,1000.f,"default");
@@ -333,7 +333,7 @@ void testApp::liveVideoChanged(bool & pressed){
 		kinect.setCameraTiltAngle(tilt);
 		source = &kinect;
 	}else{
-		kPlayer.setup("depth4-19-4-50.bin",true);
+		kPlayer.setup("depth.bin",false);
 		source = &kPlayer;
 	}
 }
