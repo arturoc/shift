@@ -41,12 +41,12 @@ void MeshRenderer::update(float * vertexes, int w,int h){
 			depth6 = *(vertexes+w);
 
 			if(useDepthFactor){
-				point = getRealWorldCoordinates(x,y,depth1);
-				point2 = getRealWorldCoordinates(x+1,y,depth2);
-				point3 = getRealWorldCoordinates(x,y+1,depth3);
-				point4 = getRealWorldCoordinates(x+1,y+1,depth4);
-				point5 = getRealWorldCoordinates(x+2,y,depth5);
-				point6 = getRealWorldCoordinates(x+2,y+1,depth6);
+				point = calibration.getWorldCoordinateFor(x,y,depth1);
+				point2 = calibration.getWorldCoordinateFor(x+1,y,depth2);
+				point3 = calibration.getWorldCoordinateFor(x,y+1,depth3);
+				point4 = calibration.getWorldCoordinateFor(x+1,y+1,depth4);
+				point5 = calibration.getWorldCoordinateFor(x+2,y,depth5);
+				point6 = calibration.getWorldCoordinateFor(x+2,y+1,depth6);
 			}else{
 				point.set(x,y,-depth1);
 				point2.set((x+1),(y),-depth2);
@@ -84,7 +84,7 @@ void MeshRenderer::update(float * vertexes, int w,int h){
 	}
 }
 
-void MeshRenderer::updateWithTexture(float * vertexes, int w,int h){
+void MeshRenderer::update(float * vertexes, ofPoint * texcoords, int w,int h){
 	va.clear();
 	float depth1,depth2,depth3,depth4;
 	ofPoint point,point2,point3,point4;
@@ -93,8 +93,10 @@ void MeshRenderer::updateWithTexture(float * vertexes, int w,int h){
 	for(int y=0; y<h-1; y++){
 		for(int x=0;x<w-1;x++){
 			depth1 = *vertexes++;
-			depth2 = *(vertexes+1);
-			depth3 = *(vertexes+(w-2));
+			depth2 = *vertexes;
+			depth3 = *(vertexes+(w-1));
+
+			tex1 = *texcoords++;
 
 			if(depth2==0 || depth2>depthThreshold || depth3==0 || depth3>depthThreshold){
 				continue;
@@ -103,25 +105,25 @@ void MeshRenderer::updateWithTexture(float * vertexes, int w,int h){
 
 			depth4 = *(vertexes+(w));
 
-			if(useDepthFactor){
-				point = getRealWorldCoordinates(x,y,depth1);
-				point2 = getRealWorldCoordinates(x+1,y,depth2);
-				point3 = getRealWorldCoordinates(x,y+1,depth3);
-				point4 = getRealWorldCoordinates(x+1,y+1,depth4);
+			tex2 = *texcoords;
+			tex3 = *(texcoords+(w-1));
+			tex4 = *(texcoords+w);
 
-				tex1 = getCalibratedRGBCoords(point);
-				tex2 = getCalibratedRGBCoords(point2);
-				tex3 = getCalibratedRGBCoords(point3);
-				tex4 = getCalibratedRGBCoords(point4);
+			if(useDepthFactor){
+				point = calibration.getWorldCoordinateFor(x,y,depth1);
+				point2 = calibration.getWorldCoordinateFor(x+1,y,depth2);
+				point3 = calibration.getWorldCoordinateFor(x,y+1,depth3);
+				point4 = calibration.getWorldCoordinateFor(x+1,y+1,depth4);
+
+				point.z = -point.z;
+				point2.z = -point2.z;
+				point3.z = -point3.z;
+				point4.z = -point4.z;
 			}else{
 				point.set(x,y,-depth1);
 				point2.set((x+1),(y),-depth2);
 				point3.set((x),(y+1),-depth3);
 				point4.set((x+1),(y+1),-depth4);
-				tex1 = point;
-				tex2 = point2;
-				tex3 = point3;
-				tex4 = point4;
 			}
 
 
@@ -144,6 +146,7 @@ void MeshRenderer::updateWithTexture(float * vertexes, int w,int h){
 		}
 
 		vertexes++;
+		texcoords++;
 	}
 }
 

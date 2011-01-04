@@ -100,6 +100,7 @@ void testApp::setup(){
 	gui.addToggle("color",&color);
 	gui.addToggle("depth to gray",&pc_renderer.depthToGray);
 	gui.addSpinSlider("min. gray", &pc_renderer.minimumGray, 0, 255);
+	gui.addSpinSlider("mesh object thres.", &mesh_renderer.objectDepthThreshold, 0, 255);
 
 	gui.addSpinSlider("focusDistance", &pc_renderer.focusDistance, 0, 2000);
 	gui.addSpinSlider("aperture", &pc_renderer.aperture, 0, .1, .001);
@@ -139,7 +140,7 @@ void testApp::update(){
 		mesh_renderer.depthThreshold = depthThreshold;
 		mesh_renderer.useDepthFactor = useDepthFactor;
 		//mesh_renderer.update(source->getDistancePixels(),source->getCalibratedRGBPixels(),640,480);
-		mesh_renderer.updateWithTexture(source->getDistancePixels(),640,480);
+		mesh_renderer.update(source->getDistancePixels(),source->getCalibratedTexCoords(), 640,480);
 	}else{
 		pc_renderer.depthThreshold = depthThreshold;
 		pc_renderer.useDepthFactor = useDepthFactor;
@@ -206,8 +207,10 @@ void testApp::draw(){
 		ofSetColor(255,255,255);
 		if((texPoints || pc_renderer.dof) && !mesh)
 			pc_renderer.draw(&pointTex.getTextureReference());
-		else if(!mesh)
+		else if(!mesh)// && !color)
 			pc_renderer.draw();
+		/*else if(!mesh)
+			pc_renderer.draw(&source->getTextureReference());*/
 		else if(color)
 			mesh_renderer.draw(&source->getTextureReference());
 		else if(pc_renderer.depthToGray)

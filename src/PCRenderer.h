@@ -21,6 +21,7 @@ public:
 
 	void update(float * vertexes, int w,int h);
 	void update(float * vertexes, unsigned char* rgb, int w,int h);
+	void update(float * vertexes, ofPoint* texcoords, int w,int h);
 	void draw(ofTexture * tex=NULL);
 
 	int oneInX, oneInY;

@@ -10,6 +10,7 @@
 
 #include "Renderer.h"
 #include "VertexArray.h"
+#include "ofxKinectCalibration.h"
 
 class MeshRenderer: public Renderer {
 public:
@@ -19,7 +20,7 @@ public:
 	void setup();
 
 	void update(float * vertexes, int w,int h);
-	void updateWithTexture(float * vertexes, int w,int h);
+	void update(float * vertexes, ofPoint * texCoords, int w,int h);
 	void update(float * vertexes, unsigned char* rgb, int w,int h);
 	void draw(ofTexture * tex=NULL);
 
@@ -27,6 +28,7 @@ public:
 
 private:
 	VertexArray va;
+	ofxKinectCalibration calibration;
 };
 
 #endif /* MESHRENDERER_H_ */

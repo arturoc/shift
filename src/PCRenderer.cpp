@@ -106,6 +106,44 @@ void PCRenderer::update(float * vertexes, unsigned char* rgb, int w,int h){
 	}
 }
 
+void PCRenderer::update(float * vertexes, ofPoint* texcoords, int w,int h){
+	va.clear();
+	pointSizes.clear();
+	/// 125
+	/// 346
+	float depth;
+	unsigned char r,g,b;
+	ofPoint point;
+	ofPoint uv;
+
+	for(int y=0; y<h; y+=oneInY){
+		for(int x=0;x<w;x+=oneInX){
+			depth = *vertexes++;
+			uv = *texcoords++;
+
+			if(x+oneInX<w){
+				vertexes+=oneInX-1;
+				texcoords+=(oneInX-1);
+			}else{
+				vertexes+=w-x-1;
+				texcoords+=(w-x-1);
+			}
+
+			if(depth==0 || depth>depthThreshold) continue;
+
+			if(useDepthFactor && !dof){ // the dof shader automatically does the depthFactor conversion
+				point = getRealWorldCoordinates(x,y,depth);
+			}else{
+				point.set(x,y,-depth);
+			}
+
+			va.addVertex(point,uv);
+		}
+		vertexes += (oneInY-1)*w;
+		texcoords += (oneInY-1)*w;
+	}
+}
+
 void PCRenderer::draw(ofTexture * tex){
 	if(dof){
 		//if(tex) tex->bind();
