@@ -6,6 +6,7 @@ uniform float maxPointSize;
 uniform int depthToGray;
 uniform float invDepthThres;
 uniform float minimumGray;
+uniform float pointSizeFactor;
 
 const float PI = 3.14159265;
 const float fx_d = 1.0 / 5.9421434211923247e+02;
@@ -32,7 +33,7 @@ void main() {
 	// the +1. is because point sizes <1 are rendered differently than those >1
 	
 	float size = min(abs(gl_Position.z - focusDistance) * aperture + 1.,maxPointSize);
-	gl_PointSize = size*8.;
+	gl_PointSize = size*pointSizeFactor;
 	
 	if(depthToGray){
 		gl_FrontColor = gl_Color * minimumGray + 1.-clamp(abs(gl_Position.z*invDepthThres),0,1);
