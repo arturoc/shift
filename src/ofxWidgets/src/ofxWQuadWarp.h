@@ -17,10 +17,14 @@ public:
 	virtual ~ofxWQuadWarp(){}
 
 	void init(ofRectangle origin);
+	void reshape(ofRectangle origin);
 	void render(ofxWidgetsStyle & style);
 
 	ofPoint src[4];
 	ofPoint dst[4];
+
+	bool 		moveOrigin;
+	ofRectangle origin;
 
 protected:
 
@@ -37,7 +41,6 @@ protected:
 private:
 	ofxWCircleButton * buttons[4];
 	ofxWCircleButton * activeButton;
-	ofRectangle origin;
 	ofPoint mousePos;
 	ofPoint prevMousePos;
 };
