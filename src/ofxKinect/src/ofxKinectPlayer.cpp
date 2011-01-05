@@ -15,6 +15,7 @@ ofxKinectPlayer::ofxKinectPlayer(){
 	buf = 0;
 	rgb = 0;
 	bUseTexture = true;
+	useCompression = true;
 	fps = 30;
 }
 
@@ -31,36 +32,53 @@ ofxKinectPlayer::~ofxKinectPlayer() {
 
 void ofxKinectPlayer::setUseTexture(bool _bUseTexture){
 	bUseTexture = _bUseTexture;
+	img.setUseTexture(_bUseTexture);
 }
 
 void ofxKinectPlayer::setup(const string & file, bool color){
+	filename = file;
 	f = fopen(ofToDataPath(file).c_str(), "rb");
 	if(!buf) buf 		= new uint16_t[640*480];
 	if(!rgb) rgb = new unsigned char[640*480*3];
 	memset(rgb,255,640*480*3);
 	if(!depthTex.bAllocated() && bUseTexture)
 		depthTex.allocate(640,480,GL_LUMINANCE);
-	if(!videoTex.bAllocated() && bUseTexture)
+	if(!videoTex.bAllocated() && bUseTexture && !useCompression)
 		videoTex.allocate(640,480,GL_RGB);
+	else if(useCompression){
+		img.allocate(640,480,OF_IMAGE_COLOR);
+	}
+
+
 	readColor = color;
 	calibration.init(3);
 	lastFrameTime = ofGetElapsedTimeMillis();
+	frameNum=0;
 }
 
 void ofxKinectPlayer::update(){
 	if(!f) return;
 	if((ofGetElapsedTimeMillis()-lastFrameTime)<(1000./float(fps))) return;
 	lastFrameTime = ofGetElapsedTimeMillis();
-	if(readColor)
-		fread(rgb,640*480*3,1,f);
+	if(readColor){
+		if(useCompression){
+			char name[1024];
+			sprintf(name,"%s%09i.jpg",filename.c_str(),frameNum);
+			img.loadImage(name);
+		}else{
+			fread(rgb,640*480*3,1,f);
+		}
+	}
 	fread(buf,640*480*sizeof(uint16_t),1,f);
 
 	calibration.update(buf);
 	if(bUseTexture){
 		depthTex.loadData(calibration.getDepthPixels(),640,480,GL_LUMINANCE);
-		videoTex.loadData(rgb,640,480,GL_RGB);
+		if(!useCompression){
+			videoTex.loadData(rgb,640,480,GL_RGB);
+		}
 	}
-
+	frameNum++;
 }
 
 void ofxKinectPlayer::draw(float x, float y){
@@ -83,7 +101,11 @@ void ofxKinectPlayer::draw(const ofRectangle & rect){
 
 
 unsigned char * ofxKinectPlayer::getPixels(){
-	return rgb;
+	if(useCompression)
+		return img.getPixels();
+	else
+		return rgb;
+
 }
 
 unsigned char * ofxKinectPlayer::getDepthPixels(){
@@ -95,7 +117,10 @@ float * ofxKinectPlayer::getDistancePixels(){
 }
 
 unsigned char * ofxKinectPlayer::getCalibratedRGBPixels(){
-	return calibration.getCalibratedRGBPixels(rgb);
+	if(useCompression)
+		return calibration.getCalibratedRGBPixels(img.getPixels());
+	else
+		return calibration.getCalibratedRGBPixels(rgb);
 }
 
 ofPoint * ofxKinectPlayer::getCalibratedTexCoords(){
@@ -104,7 +129,10 @@ ofPoint * ofxKinectPlayer::getCalibratedTexCoords(){
 
 
 ofTexture & ofxKinectPlayer::getTextureReference(){
-	return videoTex;
+	if(useCompression)
+		return img.getTextureReference();
+	else
+		return videoTex;
 }
 
 ofTexture & ofxKinectPlayer::getDepthTextureReference(){
@@ -124,9 +152,10 @@ bool ofxKinectPlayer::isFrameNew(){
 }
 
 void ofxKinectPlayer::close(){
-	if(f)
+	if(f){
 		fclose(f);
-	f = 0;
+		f = 0;
+	}
 }
 
 //------------------------------------
@@ -140,3 +169,10 @@ ofxPoint3f ofxKinectPlayer::getWorldCoordinateFor(int x, int y) {
 	return calibration.getWorldCoordinateFor(x,y);
 }
 
+void ofxKinectPlayer::setUseCompression(bool compress){
+	useCompression = compress;
+}
+
+bool ofxKinectPlayer::isUsingCompression(){
+	return useCompression;
+}

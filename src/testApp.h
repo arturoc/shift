@@ -45,12 +45,12 @@ class testApp : public ofBaseApp{
 
 		void toggleTwoScreens(bool & pressed);
 
-		ofxKinectPlayer kPlayer;
+		ofxKinectPlayer kPlayer[10];
 		ofxKinect	 kinect;
 		ofxBase3DVideo * source;
 
-		PCRenderer pc_renderer;
-		MeshRenderer mesh_renderer;
+		PCRenderer pc_renderer[10];
+		MeshRenderer mesh_renderer[10];
 
 		ofxCamera camera;
 
@@ -96,13 +96,25 @@ class testApp : public ofBaseApp{
 		float dramaticZoomFactor;
 
 		ofxWQuadWarp warp;
-		VertexArray vaWarp;
 		ofxMatrix4x4 homography;
 		ofPoint src[4],dst[4];
 		bool whiteScreen;
 
 		bool twoScreens;
+		bool noRender;
 
+
+		int fps;
+
+		int oneInX, oneInY;
+		bool dof;
+		int minimumGray;
+		int objectDepthThreshold;
+
+		float focusDistance, aperture, pointBrightness, rgbBrightness, maxPointSize, pointSizeFactor;
+
+		int numPlayers;
+		bool showLive,showPlayer[10];
 };
 
 #endif

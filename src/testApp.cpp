@@ -21,9 +21,9 @@ void testApp::setup(){
 	fov = 60;
 	postTranslateZ=0;
 
-	source = &kPlayer;
+	source = &kPlayer[0];
 
-	kPlayer.setup("depth.bin",true);
+	kPlayer[0].setup("depth.bin",true);
 	//camera.disableMouseEvents();
 	camera.position(0,0,0);
 	//cameraPosSlider.init("camera xz: ",0.f,0.f,-1000.f,1000.f,-1000.f,1000.f,"default");
@@ -49,13 +49,21 @@ void testApp::setup(){
 
 	showRGB=false;
 	twoScreens=false;
+	showLive=false;
+	//showPlayer[0]=true;
+	//showPlayer[1]=true;
+	for(int i=0;i<10;i++)
+		showPlayer[i]=false;
+
+	fps=30;
+
 
 	gui.init("");
 	gui.addTab("3d camera");
 	//ofAddListener(gui.addSpinSlider("camera y:",640,-640,640).floatEvent,this,&testApp::cameraYChanged);
 	//ofAddListener(gui.addSpinSlider("camera lookat y:",320,-640,640).floatEvent,this,&testApp::cameraLookAtYChanged);
-	gui.addSpinSlider("render 1 in x:",&pc_renderer.oneInX,1,30);
-	gui.addSpinSlider("render 1 in y:",&pc_renderer.oneInY,1,30);
+	gui.addSpinSlider("render 1 in x:",&oneInX,1,30);
+	gui.addSpinSlider("render 1 in y:",&oneInY,1,30);
 	//gui.addSpinSlider("depth threshold: ",&renderer.depthThreshold,0,1000);
 	gui.addSpinSlider("near clip:",&nearClip,0,255);
 	gui.addSpinSlider("far clip:",&farClip,0,255);
@@ -77,7 +85,8 @@ void testApp::setup(){
 	gui.addTab("kinect");
 	ofAddListener(gui.addToggle("video/live",false).boolEvent,this,&testApp::liveVideoChanged);
 	ofAddListener(gui.addSpinSlider("tilt",0,-30,30,1).floatEvent,this,&testApp::tiltChanged);
-	gui.addSpinSlider("player fps",&kPlayer.fps,0,60,1);
+	gui.addSpinSlider("player fps",&fps,0,60,1);
+	gui.addToggle("no render",&noRender);
 	ofAddListener(gui.addToggle("record",false).boolEvent,this,&testApp::recordChanged);
 
 	gui.addTab("view");
@@ -86,6 +95,12 @@ void testApp::setup(){
 	gui.addToggle("show clipPlanes",&showClipPlanes);
 	gui.addToggle("show rgb",&showRGB);
 	gui.addToggle("show stats",&showStats);
+	gui.addToggle("show live",&showLive);
+	gui.addToggle("show player1",&(showPlayer[0]));
+	gui.addToggle("show player2",&(showPlayer[1]));
+	gui.addToggle("show player3",&(showPlayer[2]));
+	gui.addToggle("show player4",&(showPlayer[3]));
+	gui.addToggle("show player5",&(showPlayer[4]));
 
 
 	gray = 255;
@@ -100,21 +115,21 @@ void testApp::setup(){
 	gui.addSpinSlider("scaleFactor",&scaleFactor,0,.01,.001);
 	gui.addToggle("draw mesh", &mesh);
 	gui.addToggle("real world coords",&useDepthFactor);
-	gui.addToggle("depth of field",&pc_renderer.dof);
+	gui.addToggle("depth of field",&dof);
 	gui.addToggle("color",&color);
-	gui.addToggle("depth to gray",&pc_renderer.depthToGray);
-	gui.addSpinSlider("min. gray", &pc_renderer.minimumGray, 0, 255);
-	gui.addSpinSlider("mesh object thres.", &mesh_renderer.objectDepthThreshold, 0, 255);
+	gui.addToggle("depth to gray",&depthToGray);
+	gui.addSpinSlider("min. gray", &minimumGray, 0, 255);
+	gui.addSpinSlider("mesh object thres.", &objectDepthThreshold, 0, 255);
 
-	gui.addSpinSlider("focusDistance", &pc_renderer.focusDistance, 0, 2000);
-	gui.addSpinSlider("aperture", &pc_renderer.aperture, 0, .1, .001);
-	gui.addSpinSlider("pointBrightness", &pc_renderer.pointBrightness, 0, 1, .01);
-	gui.addSpinSlider("rgbBrightness",  &pc_renderer.rgbBrightness, 0, 1, .01);
-	gui.addSpinSlider("maxPointSize", &pc_renderer.maxPointSize, 0, 30);
+	gui.addSpinSlider("focusDistance", &focusDistance, 0, 2000);
+	gui.addSpinSlider("aperture", &aperture, 0, .1, .001);
+	gui.addSpinSlider("pointBrightness", &pointBrightness, 0, 1, .01);
+	gui.addSpinSlider("rgbBrightness",  &rgbBrightness, 0, 1, .01);
+	gui.addSpinSlider("maxPointSize", &maxPointSize, 0, 30);
 	gui.addGroupedToggle("circle",true,"DOF_TEX","DOF_TEX_CIRCLE");
 	gui.addGroupedToggle("bokeh",false,"DOF_TEX","DOF_TEX_BOKEH");
 	gui.addGroupedToggle("gauss",false,"DOF_TEX","DOF_TEX_GAUSS");
-	gui.addSpinSlider("pSize factor", &pc_renderer.pointSizeFactor, 1, 30);
+	gui.addSpinSlider("pSize factor", &pointSizeFactor, 1, 30);
 	gui.addToggle("white screen",&whiteScreen);
 	gui.addToggle("move warp",&warp.moveOrigin);
 	ofAddListener(gui.addButton("two screens").boolEvent,this,&testApp::toggleTwoScreens);
@@ -146,162 +161,210 @@ void testApp::setup(){
 //--------------------------------------------------------------
 void testApp::update(){
 	source->update();
-	if(showContour){
-		cvdepth.setFromPixels(source->getDepthPixels(),640,480);
-		grayThreshFar = cvdepth;
-		grayThresh = cvdepth;
-		grayThreshFar.threshold(farClip, true);
-		grayThresh.threshold(nearClip);
-		cvAnd(grayThresh.getCvImage(), grayThreshFar.getCvImage(), cvdepth.getCvImage(), NULL);
-		contourFinder.findContours(cvdepth,min_blob,max_blob,10,false,true);
-	}
 
-	if(mesh){
-		mesh_renderer.depthThreshold = depthThreshold;
-		mesh_renderer.useDepthFactor = useDepthFactor;
-		//mesh_renderer.update(source->getDistancePixels(),source->getCalibratedRGBPixels(),640,480);
-		mesh_renderer.update(source->getDistancePixels(),source->getCalibratedTexCoords(), 640,480);
-	}else{
-		pc_renderer.depthThreshold = depthThreshold;
-		pc_renderer.useDepthFactor = useDepthFactor;
-		if(color)
-			pc_renderer.update(source->getDistancePixels(),source->getCalibratedRGBPixels(),640,480);
-		else
-			pc_renderer.update(source->getDistancePixels(),640,480);
-	}
-	if(showRGB && source==(ofxBase3DVideo*)&kinect){
-		//texRGBCalibrated.loadData(kinect.getCalibratedRGBPixels(),640,480,GL_RGB);
+	if(!noRender){
+		if(showLive){
+			//cout << "updating live "  << endl;
+			if(mesh){
+				mesh_renderer[0].objectDepthThreshold=objectDepthThreshold;
+				mesh_renderer[0].depthThreshold = depthThreshold;
+				mesh_renderer[0].useDepthFactor = useDepthFactor;
+				//mesh_renderer.update(source->getDistancePixels(),source->getCalibratedRGBPixels(),640,480);
+				mesh_renderer[0].update(source->getDistancePixels(),source->getCalibratedTexCoords(), 640,480);
+			}else{
+				pc_renderer[0].oneInX=oneInX;
+				pc_renderer[0].oneInY=oneInY;
+				pc_renderer[0].dof=dof;
+				pc_renderer[0].depthToGray=depthToGray;
+				pc_renderer[0].minimumGray=minimumGray;
+				pc_renderer[0].focusDistance=focusDistance,
+				pc_renderer[0].aperture=aperture,
+				pc_renderer[0].pointBrightness=pointBrightness,
+				pc_renderer[0].rgbBrightness=rgbBrightness,
+				pc_renderer[0].maxPointSize=maxPointSize,
+				pc_renderer[0].pointSizeFactor=pointSizeFactor;
+				pc_renderer[0].depthThreshold = depthThreshold;
+				pc_renderer[0].useDepthFactor = useDepthFactor;
+				if(color){
+					pc_renderer[0].update(source->getDistancePixels(),source->getCalibratedRGBPixels(),640,480);
+				}else{
+					pc_renderer[0].update(source->getDistancePixels(),640,480);
+				}
+			}
+		}
+
+		for(int i=1;i<numPlayers+1;i++){
+			kPlayer[i-1].update();
+			kPlayer[i-1].fps=fps;
+			if(!(showPlayer[i-1])) continue;
+			//cout << "updating player " << i-1 << endl;
+			if(mesh){
+				mesh_renderer[i].objectDepthThreshold=objectDepthThreshold;
+				mesh_renderer[i].depthThreshold = depthThreshold;
+				mesh_renderer[i].useDepthFactor = useDepthFactor;
+				//mesh_renderer.update(kPlayer[i-1].getDistancePixels(),kPlayer[i-1].getCalibratedRGBPixels(),640,480);
+				mesh_renderer[i].update(kPlayer[i-1].getDistancePixels(),kPlayer[i-1].getCalibratedTexCoords(), 640,480);
+			}else{
+				pc_renderer[i].oneInX=oneInX;
+				pc_renderer[i].oneInY=oneInY;
+				pc_renderer[i].dof=dof;
+				pc_renderer[i].depthToGray=depthToGray;
+				pc_renderer[i].minimumGray=minimumGray;
+
+				pc_renderer[i].focusDistance=focusDistance,
+				pc_renderer[i].aperture=aperture,
+				pc_renderer[i].pointBrightness=pointBrightness,
+				pc_renderer[i].rgbBrightness=rgbBrightness,
+				pc_renderer[i].maxPointSize=maxPointSize,
+				pc_renderer[i].pointSizeFactor=pointSizeFactor;
+				pc_renderer[i].depthThreshold = depthThreshold;
+				pc_renderer[i].useDepthFactor = useDepthFactor;
+				if(color)
+					pc_renderer[i].update(kPlayer[i-1].getDistancePixels(),kPlayer[i-1].getCalibratedRGBPixels(),640,480);
+				else
+					pc_renderer[i].update(kPlayer[i-1].getDistancePixels(),640,480);
+			}
+		}
+
+		if(showContour){
+			cvdepth.setFromPixels(source->getDepthPixels(),640,480);
+			grayThreshFar = cvdepth;
+			grayThresh = cvdepth;
+			grayThreshFar.threshold(farClip, true);
+			grayThresh.threshold(nearClip);
+			cvAnd(grayThresh.getCvImage(), grayThreshFar.getCvImage(), cvdepth.getCvImage(), NULL);
+			contourFinder.findContours(cvdepth,min_blob,max_blob,10,false,true);
+		}
+
+		for(int i=0;i<4;i++){
+			src[i]=warp.src[i]-ofPoint(warp.origin.x,warp.origin.y);
+			dst[i]=warp.dst[i]-ofPoint(warp.origin.x,warp.origin.y);
+		}
+
+		findOpenCvHomography(src,dst,homography.getPtr());
 	}
 	if(recorder.isOpened() && source==(ofxBase3DVideo*)&kinect){
 		recorder.newFrame(kinect.getPixels(),kinect.getRawDepthPixels());
 	}
-
-	vaWarp.clear();
-	vaWarp.addVertex(warp.dst[0],ofPoint(0,0));
-	vaWarp.addVertex(warp.dst[1],ofPoint(640,0));
-	vaWarp.addVertex(warp.dst[2],ofPoint(640,480));
-	vaWarp.addVertex(warp.dst[3],ofPoint(0,480));
-
-	for(int i=0;i<4;i++){
-		src[i]=warp.src[i]-ofPoint(warp.origin.x,warp.origin.y);
-		dst[i]=warp.dst[i]-ofPoint(warp.origin.x,warp.origin.y);
-	}
-
-	findOpenCvHomography(src,dst,homography.getPtr());
-
 }
 
 //--------------------------------------------------------------
 void testApp::draw(){
-
-	ofNoFill();
-	fbo.begin();
-	//ofBackground(0,0,0);
-	if(whiteScreen){
-		ofClear(255,255,255,255);
-	}else{
-		ofClear(0,0,0,255);
-		ofPushMatrix();
-			glPointSize(psize);
-
-			if(fov>0)
-				ofSetupScreenPerspective(640,480,false,fov);
-			else
-				ofSetupScreenOrtho(640,480,false);
-
-
-			ofNoFill();
-			ofSetColor(255,255,255,255);
-			ofRect(1,1,639,479);
-			//ofViewport(0,0,640,480);
-			//ofBackground(0, 0, 0);
-
-			ofTranslate(0,0,postTranslateZ);
-
-			ofTranslate(rot_axis);
-			ofRotate(rot,0,1,0);
-			if(showClipPlanes){
-				ofSetColor(255,0,0);
-				ofLine(0,0,0,ofGetHeight());
-			}
-			ofTranslate(-rot_axis);
-
-			ofTranslate(0,0,translateZ);
-
-			if(useDepthFactor || pc_renderer.dof){
-				ofScale(2,2,2);
-			}
-			if(showClipPlanes){
+	if(!noRender){
+		ofNoFill();
+		fbo.begin();
+		//ofBackground(0,0,0);
+		if(whiteScreen){
+			ofClear(255,255,255,255);
+		}else{
+			ofClear(0,0,0,255);
 			ofPushMatrix();
-				ofSetColor(255,0,0);
-				ofTranslate(0,0,-nearClip);
-				ofRect(0,0,640,480);
-				ofTranslate(0,0,nearClip-depthThreshold);
-				ofRect(0,0,640,480);
+				glPointSize(psize);
+
+				if(fov>0)
+					ofSetupScreenPerspective(640,480,false,fov);
+				else
+					ofSetupScreenOrtho(640,480,false);
+
+
+				ofNoFill();
+				ofSetColor(255,255,255,255);
+				ofRect(1,1,639,479);
+				//ofViewport(0,0,640,480);
+				//ofBackground(0, 0, 0);
+
+				ofTranslate(0,0,postTranslateZ);
+
+				ofTranslate(rot_axis);
+				ofRotate(rot,0,1,0);
+				if(showClipPlanes){
+					ofSetColor(255,0,0);
+					ofLine(0,0,0,ofGetHeight());
+				}
+				ofTranslate(-rot_axis);
+
+				ofTranslate(0,0,translateZ);
+
+				if(useDepthFactor || dof){
+					ofScale(2,2,2);
+				}
+				if(showClipPlanes){
+				ofPushMatrix();
+					ofSetColor(255,0,0);
+					ofTranslate(0,0,-nearClip);
+					ofRect(0,0,640,480);
+					ofTranslate(0,0,nearClip-depthThreshold);
+					ofRect(0,0,640,480);
+				ofPopMatrix();
+				}
+
+				if(useDepthFactor || dof){
+					ofTranslate(translateX,translateY);
+				}
+
+				ofSetColor(gray,gray,gray,alpha);
+				for(int i=0;i<numPlayers+1;i++){
+					if(i==0 && !showLive) continue;
+					if(i>0 && !(showPlayer[i-1])) continue;
+					//cout << "drawing player" << i-1 << endl;
+					if((texPoints || dof) && !mesh){
+						if(gui.getValueB("DOF_TEX_CIRCLE")){
+							pc_renderer[i].draw(&pointTex.getTextureReference());
+						}else if(gui.getValueB("DOF_TEX_BOKEH")){
+							pc_renderer[i].draw(&bokehTex.getTextureReference());
+						}else if(gui.getValueB("DOF_TEX_GAUSS")){
+							pc_renderer[i].draw(&gaussTex.getTextureReference());
+						}
+
+					}else if(!mesh){// && !color){
+						pc_renderer[i].draw();
+					/*else if(!mesh)
+						pc_renderer.draw(&source->getTextureReference());*/
+					}else if(color){
+						mesh_renderer[i].draw(&source->getTextureReference());
+					}else if(pc_renderer[i].depthToGray){
+						mesh_renderer[i].draw(&source->getDepthTextureReference());
+					}else{
+						mesh_renderer[i].draw();
+					}
+				}
+
 			ofPopMatrix();
-			}
+		}
+		fbo.end();
 
-			if(useDepthFactor || pc_renderer.dof){
-				ofTranslate(translateX,translateY);
-			}
+		ofSetColor(255,255,255);
+		ofSetupScreen();
+		//ofViewport(0,0,ofGetWidth(),ofGetHeight());
 
+		glPushMatrix();
+		//ofSetupScreenOrtho(ofGetWidth(),ofGetHeight(),true);
+		ofTranslate(ofGetWidth()-640,0);
+		glMultMatrixf(homography.getPtr());
+		fbo.draw(0,0,640,480);
+		glPopMatrix();
+		//vaWarp.draw(GL_QUADS,&fbo.getTexture(0));
 
-			ofSetColor(gray,gray,gray,alpha);
-			if((texPoints || pc_renderer.dof) && !mesh){
-				if(gui.getValueB("DOF_TEX_CIRCLE"))
-					pc_renderer.draw(&pointTex.getTextureReference());
-				else if(gui.getValueB("DOF_TEX_BOKEH"))
-					pc_renderer.draw(&bokehTex.getTextureReference());
-				else if(gui.getValueB("DOF_TEX_GAUSS"))
-					pc_renderer.draw(&gaussTex.getTextureReference());
+		ofNoFill();
+		if(showDepth){
+			cvdepth.draw(ofGetWidth()-320,ofGetHeight()-240,320,240);
+			ofRect(ofGetWidth()-320,ofGetHeight()-240,320,240);
+		}
+		if(showRGB){
+			kinect.draw(ofGetWidth()-320,ofGetHeight()-240,320,240);
+			//texRGBCalibrated.draw(ofGetWidth()-320,ofGetHeight()-240,320,240);
+			ofRect(ofGetWidth()-320,ofGetHeight()-240,320,240);
+		}
 
-			}else if(!mesh)// && !color)
-				pc_renderer.draw();
-			/*else if(!mesh)
-				pc_renderer.draw(&source->getTextureReference());*/
-			else if(color)
-				mesh_renderer.draw(&source->getTextureReference());
-			else if(pc_renderer.depthToGray)
-				mesh_renderer.draw(&source->getDepthTextureReference());
-			else
-				mesh_renderer.draw();
+		if(showContour)
+			contourFinder.draw(0,240);
 
-		ofPopMatrix();
+		if(showStats){
+			for(int i=0;i<4;i++)
+				ofDrawBitmapString(ofToString((int)src[i].x) + "," + ofToString((int)src[i].y) + ":" + ofToString((int)dst[i].x) + "," + ofToString((int)dst[i].y),ofGetWidth()-200,ofGetHeight()-(i+1)*20);
+			ofDrawBitmapString(ofToString(int(ofGetFrameRate())),ofGetWidth()-200,ofGetHeight()-5*20);
+		}
 	}
-	fbo.end();
-
-	ofSetColor(255,255,255);
-	ofSetupScreen();
-	//ofViewport(0,0,ofGetWidth(),ofGetHeight());
-
-	glPushMatrix();
-	//ofSetupScreenOrtho(ofGetWidth(),ofGetHeight(),true);
-	ofTranslate(ofGetWidth()-640,0);
-	glMultMatrixf(homography.getPtr());
-	fbo.draw(0,0,640,480);
-	glPopMatrix();
-	//vaWarp.draw(GL_QUADS,&fbo.getTexture(0));
-
-	ofNoFill();
-	if(showDepth){
-		cvdepth.draw(ofGetWidth()-320,ofGetHeight()-240,320,240);
-		ofRect(ofGetWidth()-320,ofGetHeight()-240,320,240);
-	}
-	if(showRGB){
-		kinect.draw(ofGetWidth()-320,ofGetHeight()-240,320,240);
-		//texRGBCalibrated.draw(ofGetWidth()-320,ofGetHeight()-240,320,240);
-		ofRect(ofGetWidth()-320,ofGetHeight()-240,320,240);
-	}
-
-	if(showContour)
-		contourFinder.draw(0,240);
-
-	if(showStats){
-		for(int i=0;i<4;i++)
-			ofDrawBitmapString(ofToString((int)src[i].x) + "," + ofToString((int)src[i].y) + ":" + ofToString((int)dst[i].x) + "," + ofToString((int)dst[i].y),ofGetWidth()-200,ofGetHeight()-(i+1)*20);
-		ofDrawBitmapString(ofToString(int(ofGetFrameRate())),ofGetWidth()-200,ofGetHeight()-5*20);
-	}
-
 }
 
 //--------------------------------------------------------------
@@ -331,17 +394,29 @@ void testApp::liveVideoChanged(bool & pressed){
 		kinect.init();
 		kinect.open();
 		kinect.setCameraTiltAngle(tilt);
+		kPlayer[0].setup("5-16-52-46/depth.bin",true);
+		kPlayer[1].setup("5-17-8-59/depth.bin",true);
+		kPlayer[2].setup("5-18-59-54/depth.bin",true);
+		kPlayer[3].setup("5-19-13-23/depth.bin",true);
+		kPlayer[4].setup("5-19-33-10/depth.bin",true);
 		source = &kinect;
+
+		numPlayers = 5;
 	}else{
-		kPlayer.setup("depth.bin",false);
-		source = &kPlayer;
+		kPlayer[0].setup("5-16-52-46/depth.bin",true);
+		source = &kPlayer[0];
+
+		numPlayers = 1;
 	}
 }
 
 //--------------------------------------------------------------
 void testApp::recordChanged(bool & pressed){
 	if(pressed){
-		recorder.init("depth"+ofToString(ofGetDay())+"-"+ofToString(ofGetHours())+"-"+ofToString(ofGetMinutes())+"-"+ofToString(ofGetSeconds())+".bin");
+		string folder = ofToString(ofGetDay())+"-"+ofToString(ofGetHours())+"-"+ofToString(ofGetMinutes())+"-"+ofToString(ofGetSeconds());
+
+		system(("mkdir " + ofToDataPath(folder)).c_str());
+		recorder.init(folder+"/depth.bin");
 	}else{
 		recorder.close();
 	}
@@ -355,8 +430,10 @@ void testApp::tiltChanged(float & tilt){
 //--------------------------------------------------------------
 void testApp::fakeDOFChanged(float & fakeDOF){
 	psize = fakeDOF;
-	pc_renderer.oneInX = 2+fakeDOF*(1/(20-fakeDOF));
-	pc_renderer.oneInY = 2+fakeDOF*(1/(20-fakeDOF));
+	for(int i=0;i<numPlayers+1;i++){
+		pc_renderer[i].oneInX = 2+fakeDOF*(1/(20-fakeDOF));
+		pc_renderer[i].oneInY = 2+fakeDOF*(1/(20-fakeDOF));
+	}
 	alpha = ofClamp(255./(fakeDOF*0.5),100,255);
 }
 
@@ -364,7 +441,9 @@ void testApp::fakeDOFChanged(float & fakeDOF){
 void testApp::dramaticZoomChanged(float & zoom){
 	fov = 60+zoom;
 	postTranslateZ = zoom*dramaticZoomFactor;
-	pc_renderer.focusDistance = 800.-zoom*dramaticZoomFactor;
+	for(int i=0;i<numPlayers+1;i++){
+		pc_renderer[i].focusDistance = 800.-zoom*dramaticZoomFactor;
+	}
 }
 
 void testApp::toggleTwoScreens(bool & pressed){

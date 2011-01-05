@@ -21,8 +21,15 @@ public:
 
 	bool isOpened();
 
+	void setUseCompression(bool compress);
+	bool isUsingCompression();
+
 private:
+	string filename;
 	FILE * f;
+	ofImage img;
+	int frameNum;
+	bool useCompression;
 };
 
 #endif /* KINECTRECORDER_H_ */

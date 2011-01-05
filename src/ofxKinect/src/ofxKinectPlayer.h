@@ -48,6 +48,9 @@ public:
 	float getDistanceAt(int x, int y) ;
 	ofxPoint3f getWorldCoordinateFor(int x, int y);
 
+	void setUseCompression(bool compress);
+	bool isUsingCompression();
+
 	int fps;
 private:
 	FILE * f;
@@ -61,6 +64,10 @@ private:
 	int lastFrameTime;
 
 	ofxKinectCalibration calibration;
+	ofImage img;
+	bool useCompression;
+	string filename;
+	int frameNum;
 };
 
 #endif /* KINECTPLAYER_H_ */
