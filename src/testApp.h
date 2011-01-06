@@ -14,6 +14,7 @@
 #include "ofxFbo.h"
 #include "ofxBase3DVideo.h"
 #include "ofxKinectRecorder.h"
+#include "SCRenderer.h"
 
 class testApp : public ofBaseApp{
 
@@ -30,6 +31,8 @@ class testApp : public ofBaseApp{
 		void mousePressed(int x, int y, int button);
 		void mouseReleased(int x, int y, int button);
 		void windowResized(int w, int h);
+
+		void audioReceived( float * input, int bufferSize, int nChannels );
 
 		void cameraPosChanged(ofPoint & pos);
 		void cameraLookAtChanged(ofPoint & pos);
@@ -51,6 +54,7 @@ class testApp : public ofBaseApp{
 
 		PCRenderer pc_renderer[10];
 		MeshRenderer mesh_renderer[10];
+		SCRenderer sc_renderer;
 
 		ofxCamera camera;
 
@@ -114,7 +118,8 @@ class testApp : public ofBaseApp{
 		float focusDistance, aperture, pointBrightness, rgbBrightness, maxPointSize, pointSizeFactor;
 
 		int numPlayers;
-		bool showLive,showPlayer[10];
+		bool showLive,showPlayer[10],onlyLive;
+		bool soundCloud;
 };
 
 #endif

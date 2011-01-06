@@ -10,6 +10,8 @@ void testApp::setup(){
 
 	ofEnableAlphaBlending();
 
+	sc_renderer.setup();
+
 	cvdepth.allocate(640,480);
 
 	grayThresh.allocate(640,480);
@@ -101,6 +103,7 @@ void testApp::setup(){
 	gui.addToggle("show player3",&(showPlayer[2]));
 	gui.addToggle("show player4",&(showPlayer[3]));
 	gui.addToggle("show player5",&(showPlayer[4]));
+	gui.addToggle("only live",&onlyLive);
 
 
 	gray = 255;
@@ -114,6 +117,9 @@ void testApp::setup(){
 	gui.addSpinSlider("minDistance",&minDistance,0,-100,1);
 	gui.addSpinSlider("scaleFactor",&scaleFactor,0,.01,.001);
 	gui.addToggle("draw mesh", &mesh);
+	gui.addToggle("draw sound", &soundCloud);
+	gui.addSpinSlider("sound buffers",&sc_renderer.numSoundBuffers,1,64);
+	gui.addSpinSlider("sound depth",&sc_renderer.soundDepthFactor,0,2000);
 	gui.addToggle("real world coords",&useDepthFactor);
 	gui.addToggle("depth of field",&dof);
 	gui.addToggle("color",&color);
@@ -156,6 +162,9 @@ void testApp::setup(){
 	//ofAddListener(cameraPosSlider.floatEvent,this,&testApp::cameraPosChanged);
 	//ofAddListener(cameraLookAtSlider.floatEvent,this,&testApp::cameraLookAtChanged);
 	glDisable(GL_LIGHTING);
+
+
+	ofSoundStreamSetup(0,2,this,44100,1024,1);
 }
 
 //--------------------------------------------------------------
@@ -165,7 +174,28 @@ void testApp::update(){
 	if(!noRender){
 		if(showLive){
 			//cout << "updating live "  << endl;
-			if(mesh){
+			if(soundCloud){
+				sc_renderer.step = oneInX;
+				sc_renderer.useDepthFactor = useDepthFactor;
+				sc_renderer.dof=dof;
+				sc_renderer.depthToGray=depthToGray;
+				sc_renderer.minimumGray=minimumGray;
+				sc_renderer.focusDistance=focusDistance;
+				sc_renderer.aperture=aperture;
+				sc_renderer.pointBrightness=pointBrightness;
+				sc_renderer.rgbBrightness=rgbBrightness;
+				sc_renderer.maxPointSize=maxPointSize;
+				sc_renderer.pointSizeFactor=pointSizeFactor;
+				sc_renderer.depthThreshold = depthThreshold;
+				sc_renderer.useDepthFactor = useDepthFactor;
+				sc_renderer.update(source->getDepthPixels(), 640,480);
+				if(color){
+					sc_renderer.update(source->getDistancePixels(),source->getCalibratedRGBPixels(),640,480);
+				}else{
+					sc_renderer.update(source->getDistancePixels(),640,480);
+				}
+
+			}else if(mesh){
 				mesh_renderer[0].objectDepthThreshold=objectDepthThreshold;
 				mesh_renderer[0].depthThreshold = depthThreshold;
 				mesh_renderer[0].useDepthFactor = useDepthFactor;
@@ -177,11 +207,11 @@ void testApp::update(){
 				pc_renderer[0].dof=dof;
 				pc_renderer[0].depthToGray=depthToGray;
 				pc_renderer[0].minimumGray=minimumGray;
-				pc_renderer[0].focusDistance=focusDistance,
-				pc_renderer[0].aperture=aperture,
-				pc_renderer[0].pointBrightness=pointBrightness,
-				pc_renderer[0].rgbBrightness=rgbBrightness,
-				pc_renderer[0].maxPointSize=maxPointSize,
+				pc_renderer[0].focusDistance=focusDistance;
+				pc_renderer[0].aperture=aperture;
+				pc_renderer[0].pointBrightness=pointBrightness;
+				pc_renderer[0].rgbBrightness=rgbBrightness;
+				pc_renderer[0].maxPointSize=maxPointSize;
 				pc_renderer[0].pointSizeFactor=pointSizeFactor;
 				pc_renderer[0].depthThreshold = depthThreshold;
 				pc_renderer[0].useDepthFactor = useDepthFactor;
@@ -193,36 +223,38 @@ void testApp::update(){
 			}
 		}
 
-		for(int i=1;i<numPlayers+1;i++){
-			kPlayer[i-1].update();
-			kPlayer[i-1].fps=fps;
-			if(!(showPlayer[i-1])) continue;
-			//cout << "updating player " << i-1 << endl;
-			if(mesh){
-				mesh_renderer[i].objectDepthThreshold=objectDepthThreshold;
-				mesh_renderer[i].depthThreshold = depthThreshold;
-				mesh_renderer[i].useDepthFactor = useDepthFactor;
-				//mesh_renderer.update(kPlayer[i-1].getDistancePixels(),kPlayer[i-1].getCalibratedRGBPixels(),640,480);
-				mesh_renderer[i].update(kPlayer[i-1].getDistancePixels(),kPlayer[i-1].getCalibratedTexCoords(), 640,480);
-			}else{
-				pc_renderer[i].oneInX=oneInX;
-				pc_renderer[i].oneInY=oneInY;
-				pc_renderer[i].dof=dof;
-				pc_renderer[i].depthToGray=depthToGray;
-				pc_renderer[i].minimumGray=minimumGray;
+		if(!onlyLive){
+			for(int i=1;i<numPlayers+1;i++){
+				kPlayer[i-1].update();
+				kPlayer[i-1].fps=fps;
+				if(!(showPlayer[i-1])) continue;
+				//cout << "updating player " << i-1 << endl;
+				if(mesh){
+					mesh_renderer[i].objectDepthThreshold=objectDepthThreshold;
+					mesh_renderer[i].depthThreshold = depthThreshold;
+					mesh_renderer[i].useDepthFactor = useDepthFactor;
+					//mesh_renderer.update(kPlayer[i-1].getDistancePixels(),kPlayer[i-1].getCalibratedRGBPixels(),640,480);
+					mesh_renderer[i].update(kPlayer[i-1].getDistancePixels(),kPlayer[i-1].getCalibratedTexCoords(), 640,480);
+				}else{
+					pc_renderer[i].oneInX=oneInX;
+					pc_renderer[i].oneInY=oneInY;
+					pc_renderer[i].dof=dof;
+					pc_renderer[i].depthToGray=depthToGray;
+					pc_renderer[i].minimumGray=minimumGray;
 
-				pc_renderer[i].focusDistance=focusDistance,
-				pc_renderer[i].aperture=aperture,
-				pc_renderer[i].pointBrightness=pointBrightness,
-				pc_renderer[i].rgbBrightness=rgbBrightness,
-				pc_renderer[i].maxPointSize=maxPointSize,
-				pc_renderer[i].pointSizeFactor=pointSizeFactor;
-				pc_renderer[i].depthThreshold = depthThreshold;
-				pc_renderer[i].useDepthFactor = useDepthFactor;
-				if(color)
-					pc_renderer[i].update(kPlayer[i-1].getDistancePixels(),kPlayer[i-1].getCalibratedRGBPixels(),640,480);
-				else
-					pc_renderer[i].update(kPlayer[i-1].getDistancePixels(),640,480);
+					pc_renderer[i].focusDistance=focusDistance,
+					pc_renderer[i].aperture=aperture,
+					pc_renderer[i].pointBrightness=pointBrightness,
+					pc_renderer[i].rgbBrightness=rgbBrightness,
+					pc_renderer[i].maxPointSize=maxPointSize,
+					pc_renderer[i].pointSizeFactor=pointSizeFactor;
+					pc_renderer[i].depthThreshold = depthThreshold;
+					pc_renderer[i].useDepthFactor = useDepthFactor;
+					if(color)
+						pc_renderer[i].update(kPlayer[i-1].getDistancePixels(),kPlayer[i-1].getCalibratedRGBPixels(),640,480);
+					else
+						pc_renderer[i].update(kPlayer[i-1].getDistancePixels(),640,480);
+				}
 			}
 		}
 
@@ -303,29 +335,46 @@ void testApp::draw(){
 				}
 
 				ofSetColor(gray,gray,gray,alpha);
-				for(int i=0;i<numPlayers+1;i++){
-					if(i==0 && !showLive) continue;
-					if(i>0 && !(showPlayer[i-1])) continue;
-					//cout << "drawing player" << i-1 << endl;
+
+				if(soundCloud){
 					if((texPoints || dof) && !mesh){
 						if(gui.getValueB("DOF_TEX_CIRCLE")){
-							pc_renderer[i].draw(&pointTex.getTextureReference());
+							sc_renderer.draw(&pointTex.getTextureReference());
 						}else if(gui.getValueB("DOF_TEX_BOKEH")){
-							pc_renderer[i].draw(&bokehTex.getTextureReference());
+							sc_renderer.draw(&bokehTex.getTextureReference());
 						}else if(gui.getValueB("DOF_TEX_GAUSS")){
-							pc_renderer[i].draw(&gaussTex.getTextureReference());
+							sc_renderer.draw(&gaussTex.getTextureReference());
+						}
+					}else{
+						sc_renderer.draw();
+					}
+				}else{
+					for(int i=0;i<numPlayers+1;i++){
+						if(i==0 && !showLive) continue;
+						if(i>0 && !(showPlayer[i-1])) continue;
+						//cout << "drawing player" << i-1 << endl;
+						if((texPoints || dof) && !mesh){
+							if(gui.getValueB("DOF_TEX_CIRCLE")){
+								pc_renderer[i].draw(&pointTex.getTextureReference());
+							}else if(gui.getValueB("DOF_TEX_BOKEH")){
+								pc_renderer[i].draw(&bokehTex.getTextureReference());
+							}else if(gui.getValueB("DOF_TEX_GAUSS")){
+								pc_renderer[i].draw(&gaussTex.getTextureReference());
+							}
+
+						}else if(!mesh){// && !color){
+							pc_renderer[i].draw();
+						/*else if(!mesh)
+							pc_renderer.draw(&source->getTextureReference());*/
+						}else if(color){
+							mesh_renderer[i].draw(&source->getTextureReference());
+						}else if(pc_renderer[i].depthToGray){
+							mesh_renderer[i].draw(&source->getDepthTextureReference());
+						}else{
+							mesh_renderer[i].draw();
 						}
 
-					}else if(!mesh){// && !color){
-						pc_renderer[i].draw();
-					/*else if(!mesh)
-						pc_renderer.draw(&source->getTextureReference());*/
-					}else if(color){
-						mesh_renderer[i].draw(&source->getTextureReference());
-					}else if(pc_renderer[i].depthToGray){
-						mesh_renderer[i].draw(&source->getDepthTextureReference());
-					}else{
-						mesh_renderer[i].draw();
+						if(onlyLive) break;
 					}
 				}
 
@@ -394,16 +443,25 @@ void testApp::liveVideoChanged(bool & pressed){
 		kinect.init();
 		kinect.open();
 		kinect.setCameraTiltAngle(tilt);
-		kPlayer[0].setup("5-16-52-46/depth.bin",true);
+
+		//women
+		kPlayer[0].setup("6-13-9-48/depth.bin",true);
+		kPlayer[1].setup("6-14-17-4/depth.bin",true);
+		kPlayer[2].setup("6-14-38-34/depth.bin",true);
+		kPlayer[3].setup("6-15-1-52/depth.bin",true);
+
+
+		//dresses
+		/*kPlayer[0].setup("5-16-52-46/depth.bin",true);
 		kPlayer[1].setup("5-17-8-59/depth.bin",true);
 		kPlayer[2].setup("5-18-59-54/depth.bin",true);
 		kPlayer[3].setup("5-19-13-23/depth.bin",true);
-		kPlayer[4].setup("5-19-33-10/depth.bin",true);
+		kPlayer[4].setup("5-19-33-10/depth.bin",true);*/
 		source = &kinect;
 
-		numPlayers = 5;
+		numPlayers = 4;
 	}else{
-		kPlayer[0].setup("5-16-52-46/depth.bin",true);
+		kPlayer[0].setup("6-13-9-48/depth.bin",true);
 		source = &kPlayer[0];
 
 		numPlayers = 1;
@@ -486,3 +544,7 @@ void testApp::windowResized(int w, int h){
 	warp.reshape(ofRectangle(ofGetWidth()-640,0,640,480));
 }
 
+
+void testApp::audioReceived( float * input, int bufferSize, int nChannels ){
+	sc_renderer.audioReceived(input,bufferSize,nChannels);
+}
