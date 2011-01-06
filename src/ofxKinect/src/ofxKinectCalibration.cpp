@@ -7,6 +7,14 @@
 
 #include "ofxKinectCalibration.h"
 
+/*
+ these values constrain the maximum distance in the depthPixels image to:
+ - as near as possible (raw value of 0)
+ - 4 meters away, maximum
+ both near and far clipping planes should be user-settable
+ */
+float ofxKinectCalibration::nearClipping = rawToCentimeters(0), ofxKinectCalibration::farClipping = 400;
+
 bool ofxKinectCalibration::lookupsCalculated = false;
 float ofxKinectCalibration::distancePixelsLookup[2048];
 unsigned char ofxKinectCalibration::depthPixelsLookupNearWhite[2048];
@@ -64,28 +72,67 @@ ofxKinectCalibration::ofxKinectCalibration():
 	R_rgb *= rgb_camera;*/
 }
 
+inline float ofxKinectCalibration::rawToCentimeters(unsigned short raw) {
+	return 100 * (k1 * tanf((raw / k2) + k3) - k4);
+}
+
+inline unsigned short ofxKinectCalibration::centimetersToRaw(float centimeters) {
+	return (unsigned short) (k2 * (atanf((k4 + (centimeters / 100)) / k1) - k3));
+}
+
+void ofxKinectCalibration::setClippingInCentimeters(float nearClipping, float farClipping) {
+	ofxKinectCalibration::nearClipping = nearClipping;
+	ofxKinectCalibration::farClipping = farClipping;
+	lookupsCalculated = false;
+	calculateLookups();
+}
+
+float ofxKinectCalibration::getNearClipping() {
+	return nearClipping;
+}
+
+float ofxKinectCalibration::getFarClipping() {
+	return farClipping;
+}
+
 void ofxKinectCalibration::calculateLookups() {
 	if(!lookupsCalculated) {
 		ofLog(OF_LOG_VERBOSE, "Setting up LUT for distance and depth values.");
+		
 		for(int i = 0; i < 2048; i++){
 			if(i == 2047) {
 				distancePixelsLookup[i] = 0;
 				depthPixelsLookupNearWhite[i] = 0;
 				depthPixelsLookupFarWhite[i] = 0;
 			} else {
-				// using equation from http://openkinect.org/wiki/Imaging_Information
-				const float k1 = 0.1236;
-				const float k2 = 2842.5;
-				const float k3 = 1.1863;
-				const float k4 = 0.0370;
-				distancePixelsLookup[i] = k1 * tanf(i / k2 + k3) - k4; // calculate in meters
-				distancePixelsLookup[i] *= 100; // convert to centimeters
-				depthPixelsLookupNearWhite[i] = (float) (2048 * 256) / (i - 2048);
+				distancePixelsLookup[i] = rawToCentimeters(i);
+				depthPixelsLookupNearWhite[i] = ofMap(distancePixelsLookup[i], nearClipping, farClipping, 0, 255, true);
 				depthPixelsLookupFarWhite[i] = 255 - depthPixelsLookupNearWhite[i];
 			}
 		}
 	}
 	lookupsCalculated = true;
+}
+
+float ofxKinectCalibration::convertDepthToDistance(unsigned char depth){
+	float distance;
+	if(bDepthNearValueWhite){
+		distance = ofMap(depth, 0, 255, nearClipping, farClipping, true);
+	}else{
+		distance = ofMap(255-depth, 0, 255, nearClipping, farClipping, true);
+	}
+	return distance;
+}
+
+
+unsigned char ofxKinectCalibration::convertDistanceToDepth(float distance){
+	unsigned char depth;
+	if(bDepthNearValueWhite){
+		depth = ofMap(distance, farClipping, nearClipping, 0, 255, true);
+	}else{
+		depth = ofMap(distance, nearClipping, farClipping, 0, 255, true);
+	}
+	return depth;
 }
 
 ofxKinectCalibration::~ofxKinectCalibration() {
@@ -154,8 +201,6 @@ unsigned char * ofxKinectCalibration::getCalibratedRGBPixels(unsigned char * rgb
 				texcoord2d.x = ofClamp(round(texcoord3d.x * fx_rgb *invZ) + cx_rgb,0,639);
 				texcoord2d.y = ofClamp(round(texcoord3d.y * fy_rgb *invZ) + cy_rgb,0,479);
 
-				/*texcoord2d.x = ofClamp(round(texcoord3d.x),0,639);
-				texcoord2d.y = ofClamp(round(texcoord3d.y),0,479);*/
 				int pos = int(texcoord2d.y)*640*3+int(texcoord2d.x)*3;
 				*calibratedPixels++ = rgb[pos];
 				*calibratedPixels++ = rgb[pos+1];
