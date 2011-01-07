@@ -37,9 +37,6 @@ private:
 	VertexArray va;
 	vector<float> pointSizes;
 	ofxShader shader;
-
-
-
 };
 
 #endif /* PCRENDERER_H_ */

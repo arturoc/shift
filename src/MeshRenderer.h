@@ -10,7 +10,6 @@
 
 #include "Renderer.h"
 #include "VertexArray.h"
-#include "ofxKinectCalibration.h"
 
 class MeshRenderer: public Renderer {
 public:
@@ -28,7 +27,6 @@ public:
 
 private:
 	VertexArray va;
-	ofxKinectCalibration calibration;
 };
 
 #endif /* MESHRENDERER_H_ */

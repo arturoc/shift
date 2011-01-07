@@ -9,11 +9,11 @@
 #define SCRENDERER_H_
 
 #include "Renderer.h"
-#include "ofxKinectCalibration.h"
 #include "ofxOpenCv.h"
 #include "VertexArray.h"
 #include "ofxShader.h"
 #include <deque>
+#include "Poco/Mutex.h"
 
 class SCRenderer: public Renderer {
 public:
@@ -25,6 +25,7 @@ public:
 	void update(unsigned char * depth, int w, int h);
 	void update(float * vertexes, int w,int h);
 	void update(float * vertexes, unsigned char* rgb, int w,int h);
+	void update(float * vertexes, ofPoint * texcoords, int w,int h);
 	void draw(ofTexture * tex=NULL);
 
 	void audioReceived( float * input, int bufferSize, int nChannels );
@@ -36,15 +37,18 @@ public:
 	int		 			numSoundBuffers;
 	float 				soundDepthFactor;
 
-	int 				step;
+	int 				oneInX, oneInY;
 
 	bool				dof;
-	float focusDistance;
-	float aperture;
-	float pointBrightness;
-	float rgbBrightness;
-	float maxPointSize;
-	float pointSizeFactor;
+	bool				mesh;
+	float 				focusDistance;
+	float 				aperture;
+	float 				pointBrightness;
+	float 				rgbBrightness;
+	float 				maxPointSize;
+	float 				pointSizeFactor;
+
+	float 				objectDepthThreshold;
 
 private:
 	ofxCvGrayscaleImage 	grayImage;
@@ -58,8 +62,9 @@ private:
 	deque<float*> soundBuffers;
 	int totalSoundLength;
 
-	ofxKinectCalibration calibration;
 	ofxShader shader;
+
+	Poco::FastMutex mutex;
 };
 
 #endif /* SCRENDERER_H_ */

@@ -182,10 +182,15 @@ void MeshRenderer::update(float * vertexes, unsigned char* rgb, int w,int h){
 			color4.set(*(rgb+((w3))),*(rgb+((w3)+1)),*(rgb+((w3)+2)));
 
 			if(useDepthFactor){
-				point = getRealWorldCoordinates(x,y,depth1);
-				point2 = getRealWorldCoordinates(x+1,y,depth2);
-				point3 = getRealWorldCoordinates(x,y+1,depth3);
-				point4 = getRealWorldCoordinates(x+1,y+1,depth4);
+				point = calibration.getWorldCoordinateFor(x,y,depth1);
+				point2 = calibration.getWorldCoordinateFor(x+1,y,depth2);
+				point3 = calibration.getWorldCoordinateFor(x,y+1,depth3);
+				point4 = calibration.getWorldCoordinateFor(x+1,y+1,depth4);
+
+				point.z = -point.z;
+				point2.z = -point2.z;
+				point3.z = -point3.z;
+				point4.z = -point4.z;
 			}else{
 				point.set(x,y,-depth1);
 				point2.set((x+1),(y),-depth2);
@@ -219,4 +224,5 @@ void MeshRenderer::update(float * vertexes, unsigned char* rgb, int w,int h){
 void MeshRenderer::draw(ofTexture * tex){
 	glEnable(GL_DEPTH_TEST);
 	va.draw(GL_TRIANGLES,tex);
+	glDisable(GL_DEPTH_TEST);
 }

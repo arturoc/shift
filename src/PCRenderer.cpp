@@ -53,7 +53,8 @@ void PCRenderer::update(float * vertexes, int w,int h){
 			if(depth==0 || depth>depthThreshold) continue;
 
 			if(useDepthFactor && !dof){ // the dof shader automatically does the depthFactor conversion
-				point = getRealWorldCoordinates(x,y,depth);
+				point = calibration.getWorldCoordinateFor(x,y,depth);
+				point.z = -point.z;
 			}else{
 				point.set(x,y,-depth);
 			}
@@ -95,7 +96,8 @@ void PCRenderer::update(float * vertexes, unsigned char* rgb, int w,int h){
 			if(depth==0 || depth>depthThreshold) continue;
 
 			if(useDepthFactor && !dof){ // the dof shader automatically does the depthFactor conversion
-				point = getRealWorldCoordinates(x,y,depth);
+				point = calibration.getWorldCoordinateFor(x,y,depth);
+				point.z = -point.z;
 			}else{
 				point.set(x,y,-depth);
 			}
@@ -133,7 +135,8 @@ void PCRenderer::update(float * vertexes, ofPoint* texcoords, int w,int h){
 			if(depth==0 || depth>depthThreshold) continue;
 
 			if(useDepthFactor && !dof){ // the dof shader automatically does the depthFactor conversion
-				point = getRealWorldCoordinates(x,y,depth);
+				point = calibration.getWorldCoordinateFor(x,y,depth);
+				point.z = -point.z;
 			}else{
 				point.set(x,y,-depth);
 			}
