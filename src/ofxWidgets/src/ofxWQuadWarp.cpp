@@ -11,6 +11,8 @@ ofxWQuadWarp::ofxWQuadWarp()
 :ofxWButton("quad_warp")
 {
 	moveOrigin = false;
+	resize = false;
+	keepAspect = false;
 }
 
 void ofxWQuadWarp::init(ofRectangle origin){
@@ -36,7 +38,8 @@ void ofxWQuadWarp::init(ofRectangle origin){
 		ofAddListener(buttons[i]->boolEvent,this,&ofxWQuadWarp::buttonPressed);
 	}
 
-
+	aspectRatio = origin.width/origin.height;
+	inited = true;
 }
 
 
@@ -59,6 +62,8 @@ void ofxWQuadWarp::reshape(ofRectangle origin){
 		for(int i=0; i<4; i++){
 			dst[i] = src[i];
 		}
+
+		aspectRatio = origin.width/origin.height;
 }
 
 void ofxWQuadWarp::render(ofxWidgetsStyle & style){
@@ -96,8 +101,73 @@ void ofxWQuadWarp::update(){
 		if(buttons[i]==activeButton){
 			if(moveOrigin){
 				src[i] = mousePos;
+				if(resize){
+					switch(i){
+					case 0:
+						src[1].y=src[i].y;
+						src[3].x=src[i].x;
+						break;
+					case 1:
+						src[0].y=src[i].y;
+						src[2].x=src[i].x;
+						break;
+					case 2:
+						src[3].y=src[i].y;
+						src[1].x=src[i].x;
+						break;
+					case 3:
+						src[2].y=src[i].y;
+						src[0].x=src[i].x;
+						break;
+					}
+				}
 			}
+
 			dst[i] = mousePos;
+			if(resize){
+				switch(i){
+				case 0:
+					dst[1].y=dst[i].y;
+					dst[3].x=dst[i].x;
+					if(keepAspect){
+						float xdist = fabs(dst[1].x-dst[i].x);
+						float ydist = xdist / aspectRatio;
+						dst[2].y = dst[i].y + ydist;
+						dst[3].y = dst[i].y + ydist;
+					}
+					break;
+				case 1:
+					dst[0].y=dst[i].y;
+					dst[2].x=dst[i].x;
+					if(keepAspect){
+						float xdist = fabs(dst[0].x-dst[i].x);
+						float ydist = xdist / aspectRatio;
+						dst[2].y = dst[i].y + ydist;
+						dst[3].y = dst[i].y + ydist;
+					}
+					break;
+				case 2:
+					dst[3].y=dst[i].y;
+					dst[1].x=dst[i].x;
+					if(keepAspect){
+						float xdist = fabs(dst[3].x-dst[i].x);
+						float ydist = xdist / aspectRatio;
+						dst[0].y = dst[i].y - ydist;
+						dst[1].y = dst[i].y - ydist;
+					}
+					break;
+				case 3:
+					dst[2].y=dst[i].y;
+					dst[0].x=dst[i].x;
+					if(keepAspect){
+						float xdist = fabs(dst[2].x-dst[i].x);
+						float ydist = xdist / aspectRatio;
+						dst[0].y = dst[i].y - ydist;
+						dst[0].y = dst[i].y - ydist;
+					}
+					break;
+				}
+			}
 		}
 		buttons[i]->setPosition(dst[i]);
 	}
@@ -111,8 +181,10 @@ void ofxWQuadWarp::update(){
 			}
 			dst[i]+=mouseDiff;
 		}
-		origin.x+=mouseDiff.x;
-		origin.y+=mouseDiff.y;
+		if(moveOrigin){
+			origin.x+=mouseDiff.x;
+			origin.y+=mouseDiff.y;
+		}
 	}
 	prevMousePos = mousePos;
 
@@ -132,7 +204,43 @@ ofxWidgetsState ofxWQuadWarp::manageEvent(ofxWidgetsEvent event, ofxWidgetEventA
 	//prevMousePos = mousePos;
 	mousePos.x = mouse.x;
 	mousePos.y = mouse.y;
+	int mod = glutGetModifiers();
+	if (mod == GLUT_ACTIVE_CTRL)
+		resize=true;
+	else
+		resize=false;
 
-
+	mod = glutGetModifiers();
+	if (mod == GLUT_ACTIVE_SHIFT){
+		resize=true;
+		keepAspect=true;
+	}else{
+		keepAspect=false;
+	}
 	return ofxWButton::manageEvent(event,args,currentState);
+}
+
+
+void ofxWQuadWarp::setVisible(bool visible){
+	if(!inited) return;
+	ofxWidget::setVisible(visible);
+	for(int i=0;i<4;i++){
+		buttons[i]->setVisible(visible);
+	}
+}
+
+void ofxWQuadWarp::enable(){
+	if(!inited) return;
+	ofxWidget::enable();
+	for(int i=0;i<4;i++){
+		buttons[i]->enable();
+	}
+}
+
+void ofxWQuadWarp::disable(){
+	if(!inited) return;
+	ofxWidget::disable();
+	for(int i=0;i<4;i++){
+		buttons[i]->disable();
+	}
 }

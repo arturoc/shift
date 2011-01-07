@@ -20,6 +20,10 @@ public:
 	void reshape(ofRectangle origin);
 	void render(ofxWidgetsStyle & style);
 
+	void setVisible(bool visible);
+	void enable();
+	void disable();
+
 	ofPoint src[4];
 	ofPoint dst[4];
 
@@ -43,6 +47,10 @@ private:
 	ofxWCircleButton * activeButton;
 	ofPoint mousePos;
 	ofPoint prevMousePos;
+	bool inited;
+	bool resize;
+	bool keepAspect;
+	float aspectRatio;
 };
 
 #endif /* OFXWQUADWARP_H_ */
