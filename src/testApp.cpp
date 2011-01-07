@@ -18,6 +18,7 @@ void testApp::setup(){
 	grayThreshFar.allocate(640,480);
 
 	fbo.setup(1024,768,GL_RGBA);
+	fbo2.setup(1024,768,GL_RGBA);
 
 	nearClip=0;farClip=0;
 	fov = 60;
@@ -104,6 +105,7 @@ void testApp::setup(){
 	gui.addToggle("show player4",&(showPlayer[3]));
 	gui.addToggle("show player5",&(showPlayer[4]));
 	gui.addToggle("only live",&onlyLive);
+	ofAddListener(gui.addToggle("show warp",&showWarp).boolEvent,this,&testApp::showWarpChanged);
 
 
 	gray = 255;
@@ -154,6 +156,7 @@ void testApp::setup(){
 	texRGBCalibrated.allocate(640,480,GL_RGB);
 
 	warp.init(ofRectangle(ofGetWidth()-640,0,640,480));
+	warp2.init(ofRectangle(ofGetWidth()-640*2-10,0,640,480));
 
 	//gui.addSpinSlider("camera z",);
 	//ofAddListener(gui.add2DSlider("camera xz: ",0.f,0.f,-1000.f,1000.f,-1000.f,1000.f).floatEvent,this,&testApp::cameraPosChanged);
@@ -175,7 +178,8 @@ void testApp::update(){
 		if(showLive){
 			//cout << "updating live "  << endl;
 			if(soundCloud){
-				sc_renderer.step = oneInX;
+				sc_renderer.oneInX = oneInX;
+				sc_renderer.oneInY = oneInY;
 				sc_renderer.useDepthFactor = useDepthFactor;
 				sc_renderer.dof=dof;
 				sc_renderer.depthToGray=depthToGray;
@@ -186,10 +190,13 @@ void testApp::update(){
 				sc_renderer.rgbBrightness=rgbBrightness;
 				sc_renderer.maxPointSize=maxPointSize;
 				sc_renderer.pointSizeFactor=pointSizeFactor;
-				sc_renderer.depthThreshold = depthThreshold;
 				sc_renderer.useDepthFactor = useDepthFactor;
+				sc_renderer.objectDepthThreshold = objectDepthThreshold;
+				sc_renderer.mesh = mesh;
 				sc_renderer.update(source->getDepthPixels(), 640,480);
-				if(color){
+				if(mesh){
+					sc_renderer.update(source->getDistancePixels(),source->getCalibratedTexCoords(),640,480);
+				}else if(color){
 					sc_renderer.update(source->getDistancePixels(),source->getCalibratedRGBPixels(),640,480);
 				}else{
 					sc_renderer.update(source->getDistancePixels(),640,480);
@@ -272,11 +279,117 @@ void testApp::update(){
 			src[i]=warp.src[i]-ofPoint(warp.origin.x,warp.origin.y);
 			dst[i]=warp.dst[i]-ofPoint(warp.origin.x,warp.origin.y);
 		}
-
 		findOpenCvHomography(src,dst,homography.getPtr());
+
+		for(int i=0;i<4;i++){
+			src[i]=warp2.src[i]-ofPoint(warp2.origin.x,warp2.origin.y);
+			dst[i]=warp2.dst[i]-ofPoint(warp2.origin.x,warp2.origin.y);
+		}
+		findOpenCvHomography(src,dst,homography2.getPtr());
 	}
 	if(recorder.isOpened() && source==(ofxBase3DVideo*)&kinect){
 		recorder.newFrame(kinect.getPixels(),kinect.getRawDepthPixels());
+	}
+}
+
+void testApp::drawScene(){
+	//ofBackground(0,0,0);
+	if(whiteScreen){
+		ofClear(255,255,255,255);
+	}else{
+		ofClear(0,0,0,255);
+		ofPushMatrix();
+			glPointSize(psize);
+
+			if(fov>0)
+				ofSetupScreenPerspective(640,480,false,fov);
+			else
+				ofSetupScreenOrtho(640,480,false);
+
+
+			ofNoFill();
+			ofSetColor(255,255,255,255);
+			if(showWarp)
+				ofRect(1,1,639,479);
+			//ofViewport(0,0,640,480);
+			//ofBackground(0, 0, 0);
+
+			ofTranslate(0,0,postTranslateZ);
+
+			ofTranslate(rot_axis);
+			ofRotate(rot,0,1,0);
+			if(showClipPlanes){
+				ofSetColor(255,0,0);
+				ofLine(0,0,0,ofGetHeight());
+			}
+			ofTranslate(-rot_axis);
+
+			ofTranslate(0,0,translateZ);
+
+			if(useDepthFactor || dof){
+				ofScale(2,2,2);
+			}
+			if(showClipPlanes){
+			ofPushMatrix();
+				ofSetColor(255,0,0);
+				ofTranslate(0,0,-nearClip);
+				ofRect(0,0,640,480);
+				ofTranslate(0,0,nearClip-depthThreshold);
+				ofRect(0,0,640,480);
+			ofPopMatrix();
+			}
+
+			if(useDepthFactor || dof){
+				ofTranslate(translateX,translateY);
+			}
+
+			ofSetColor(gray,gray,gray,alpha);
+
+			if(soundCloud){
+				if((texPoints || dof) && !mesh){
+					if(gui.getValueB("DOF_TEX_CIRCLE")){
+						sc_renderer.draw(&pointTex.getTextureReference());
+					}else if(gui.getValueB("DOF_TEX_BOKEH")){
+						sc_renderer.draw(&bokehTex.getTextureReference());
+					}else if(gui.getValueB("DOF_TEX_GAUSS")){
+						sc_renderer.draw(&gaussTex.getTextureReference());
+					}
+				}else if(mesh){
+					sc_renderer.draw(&source->getTextureReference());
+				}else{
+					sc_renderer.draw();
+				}
+			}else{
+				for(int i=0;i<numPlayers+1;i++){
+					if(i==0 && !showLive) continue;
+					if(i>0 && !(showPlayer[i-1])) continue;
+					//cout << "drawing player" << i-1 << endl;
+					if((texPoints || dof) && !mesh){
+						if(gui.getValueB("DOF_TEX_CIRCLE")){
+							pc_renderer[i].draw(&pointTex.getTextureReference());
+						}else if(gui.getValueB("DOF_TEX_BOKEH")){
+							pc_renderer[i].draw(&bokehTex.getTextureReference());
+						}else if(gui.getValueB("DOF_TEX_GAUSS")){
+							pc_renderer[i].draw(&gaussTex.getTextureReference());
+						}
+
+					}else if(!mesh){// && !color){
+						pc_renderer[i].draw();
+					/*else if(!mesh)
+						pc_renderer.draw(&source->getTextureReference());*/
+					}else if(color){
+						mesh_renderer[i].draw(&source->getTextureReference());
+					}else if(pc_renderer[i].depthToGray){
+						mesh_renderer[i].draw(&source->getDepthTextureReference());
+					}else{
+						mesh_renderer[i].draw();
+					}
+
+					if(onlyLive) break;
+				}
+			}
+
+		ofPopMatrix();
 	}
 }
 
@@ -285,102 +398,13 @@ void testApp::draw(){
 	if(!noRender){
 		ofNoFill();
 		fbo.begin();
-		//ofBackground(0,0,0);
-		if(whiteScreen){
-			ofClear(255,255,255,255);
-		}else{
-			ofClear(0,0,0,255);
-			ofPushMatrix();
-				glPointSize(psize);
-
-				if(fov>0)
-					ofSetupScreenPerspective(640,480,false,fov);
-				else
-					ofSetupScreenOrtho(640,480,false);
-
-
-				ofNoFill();
-				ofSetColor(255,255,255,255);
-				ofRect(1,1,639,479);
-				//ofViewport(0,0,640,480);
-				//ofBackground(0, 0, 0);
-
-				ofTranslate(0,0,postTranslateZ);
-
-				ofTranslate(rot_axis);
-				ofRotate(rot,0,1,0);
-				if(showClipPlanes){
-					ofSetColor(255,0,0);
-					ofLine(0,0,0,ofGetHeight());
-				}
-				ofTranslate(-rot_axis);
-
-				ofTranslate(0,0,translateZ);
-
-				if(useDepthFactor || dof){
-					ofScale(2,2,2);
-				}
-				if(showClipPlanes){
-				ofPushMatrix();
-					ofSetColor(255,0,0);
-					ofTranslate(0,0,-nearClip);
-					ofRect(0,0,640,480);
-					ofTranslate(0,0,nearClip-depthThreshold);
-					ofRect(0,0,640,480);
-				ofPopMatrix();
-				}
-
-				if(useDepthFactor || dof){
-					ofTranslate(translateX,translateY);
-				}
-
-				ofSetColor(gray,gray,gray,alpha);
-
-				if(soundCloud){
-					if((texPoints || dof) && !mesh){
-						if(gui.getValueB("DOF_TEX_CIRCLE")){
-							sc_renderer.draw(&pointTex.getTextureReference());
-						}else if(gui.getValueB("DOF_TEX_BOKEH")){
-							sc_renderer.draw(&bokehTex.getTextureReference());
-						}else if(gui.getValueB("DOF_TEX_GAUSS")){
-							sc_renderer.draw(&gaussTex.getTextureReference());
-						}
-					}else{
-						sc_renderer.draw();
-					}
-				}else{
-					for(int i=0;i<numPlayers+1;i++){
-						if(i==0 && !showLive) continue;
-						if(i>0 && !(showPlayer[i-1])) continue;
-						//cout << "drawing player" << i-1 << endl;
-						if((texPoints || dof) && !mesh){
-							if(gui.getValueB("DOF_TEX_CIRCLE")){
-								pc_renderer[i].draw(&pointTex.getTextureReference());
-							}else if(gui.getValueB("DOF_TEX_BOKEH")){
-								pc_renderer[i].draw(&bokehTex.getTextureReference());
-							}else if(gui.getValueB("DOF_TEX_GAUSS")){
-								pc_renderer[i].draw(&gaussTex.getTextureReference());
-							}
-
-						}else if(!mesh){// && !color){
-							pc_renderer[i].draw();
-						/*else if(!mesh)
-							pc_renderer.draw(&source->getTextureReference());*/
-						}else if(color){
-							mesh_renderer[i].draw(&source->getTextureReference());
-						}else if(pc_renderer[i].depthToGray){
-							mesh_renderer[i].draw(&source->getDepthTextureReference());
-						}else{
-							mesh_renderer[i].draw();
-						}
-
-						if(onlyLive) break;
-					}
-				}
-
-			ofPopMatrix();
-		}
+			drawScene();
 		fbo.end();
+
+
+		fbo2.begin();
+			drawScene();
+		fbo2.end();
 
 		ofSetColor(255,255,255);
 		ofSetupScreen();
@@ -388,9 +412,17 @@ void testApp::draw(){
 
 		glPushMatrix();
 		//ofSetupScreenOrtho(ofGetWidth(),ofGetHeight(),true);
-		ofTranslate(ofGetWidth()-640,0);
+		ofTranslate(warp.origin.x,warp.origin.y);
 		glMultMatrixf(homography.getPtr());
 		fbo.draw(0,0,640,480);
+		glPopMatrix();
+
+
+		glPushMatrix();
+		//ofSetupScreenOrtho(ofGetWidth(),ofGetHeight(),true);
+		ofTranslate(warp2.origin.x,warp2.origin.y);
+		glMultMatrixf(homography2.getPtr());
+		fbo2.draw(0,0,640,480);
 		glPopMatrix();
 		//vaWarp.draw(GL_QUADS,&fbo.getTexture(0));
 
@@ -452,11 +484,12 @@ void testApp::liveVideoChanged(bool & pressed){
 
 
 		//dresses
-		/*kPlayer[0].setup("5-16-52-46/depth.bin",true);
-		kPlayer[1].setup("5-17-8-59/depth.bin",true);
-		kPlayer[2].setup("5-18-59-54/depth.bin",true);
-		kPlayer[3].setup("5-19-13-23/depth.bin",true);
-		kPlayer[4].setup("5-19-33-10/depth.bin",true);*/
+		/*kPlayer[0].setup("dresses/5-16-52-46/depth.bin",true);
+		kPlayer[1].setup("dresses/5-17-8-59/depth.bin",true);
+		kPlayer[2].setup("dresses/5-18-59-54/depth.bin",true);
+		kPlayer[3].setup("dresses/5-19-13-23/depth.bin",true);
+		kPlayer[4].setup("dresses/5-19-33-10/depth.bin",true);*/
+
 		source = &kinect;
 
 		numPlayers = 4;
@@ -511,6 +544,22 @@ void testApp::toggleTwoScreens(bool & pressed){
 	}
 }
 
+
+void testApp::showWarpChanged(bool & pressed){
+	warp.setVisible(pressed);
+	if(pressed){
+		warp.enable();
+	}else{
+		warp.disable();
+	}
+	warp2.setVisible(pressed);
+	if(pressed){
+		warp2.enable();
+	}else{
+		warp2.disable();
+	}
+}
+
 //--------------------------------------------------------------
 void testApp::keyPressed(int key){
 }
@@ -542,6 +591,7 @@ void testApp::mouseReleased(int x, int y, int button){
 //--------------------------------------------------------------
 void testApp::windowResized(int w, int h){
 	warp.reshape(ofRectangle(ofGetWidth()-640,0,640,480));
+	warp2.reshape(ofRectangle(ofGetWidth()-640*2-10,0,640,480));
 }
 
 

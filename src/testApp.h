@@ -34,6 +34,8 @@ class testApp : public ofBaseApp{
 
 		void audioReceived( float * input, int bufferSize, int nChannels );
 
+		void drawScene();
+
 		void cameraPosChanged(ofPoint & pos);
 		void cameraLookAtChanged(ofPoint & pos);
 		void cameraYChanged(float & pos);
@@ -47,6 +49,7 @@ class testApp : public ofBaseApp{
 		void recordChanged(bool & pressed);
 
 		void toggleTwoScreens(bool & pressed);
+		void showWarpChanged(bool & pressed);
 
 		ofxKinectPlayer kPlayer[10];
 		ofxKinect	 kinect;
@@ -78,7 +81,7 @@ class testApp : public ofBaseApp{
 
 		bool showContour, showDepth, showClipPlanes, showRGB, showStats;
 
-		ofxFbo fbo;
+		ofxFbo fbo,fbo2;
 
 		float tilt;
 		int gray,alpha,psize;
@@ -99,8 +102,8 @@ class testApp : public ofBaseApp{
 
 		float dramaticZoomFactor;
 
-		ofxWQuadWarp warp;
-		ofxMatrix4x4 homography;
+		ofxWQuadWarp warp, warp2;
+		ofxMatrix4x4 homography,homography2;
 		ofPoint src[4],dst[4];
 		bool whiteScreen;
 
@@ -119,6 +122,7 @@ class testApp : public ofBaseApp{
 
 		int numPlayers;
 		bool showLive,showPlayer[10],onlyLive;
+		bool showWarp;
 		bool soundCloud;
 };
 
