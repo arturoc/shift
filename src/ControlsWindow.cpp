@@ -124,8 +124,6 @@ void ControlsWindow::fensterSetup(){
 	gui.addToggle("white screen",&whiteScreen);
 	gui.addToggle("move warp",&app->warp.moveOrigin);
 	//ofAddListener(gui.addButton("two screens").boolEvent,app,&testApp::toggleTwoScreens);
-	ofAddListener(gui.addToggle("camera easing",&doCameraEasing).boolEvent,app,&testApp::activateCameraEasing);
-	ofAddListener(gui.addToggle("camera easing2",&doCameraEasing).boolEvent,app,&testApp::activateCameraEasing2);
 	gui.loadFrom("settings.xml","settings");
 
 
@@ -137,6 +135,9 @@ void ControlsWindow::fensterSetup(){
 	ofAddListener(comp_gui.addSpinSlider("dramatic zoom",0.f,0.f,200.f).floatEvent,app,&testApp::dramaticZoomChanged);
 	comp_gui.addSpinSlider("d. zoom fac.",&dramaticZoomFactor,1.f,100.f);
 
+	easing_gui.init("easing");
+	ofAddListener(easing_gui.addToggle("camera easing",&doCameraEasing).boolEvent,app,&testApp::activateCameraEasing);
+	ofAddListener(easing_gui.addToggle("camera easing2",&doCameraEasing).boolEvent,app,&testApp::activateCameraEasing2);
 }
 
 void ControlsWindow::fensterUpdate(){

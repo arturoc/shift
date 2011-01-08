@@ -84,6 +84,7 @@ public:
 
 	ofxWFrame gui;
 	ofxWFrame comp_gui;
+	ofxWFrame easing_gui;
 
 	testApp * app;
 };
