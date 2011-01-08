@@ -9,59 +9,42 @@
 #include "ofMain.h"
 
 CameraEasing::CameraEasing() {
-
-
-
-
+	easing_animated_rot_x.setFrameBasedAnimation();
+	easing_animated_rot_y.setFrameBasedAnimation();
+	easing_animated_rot_z.setFrameBasedAnimation();
+	easing_animated_trans_x.setFrameBasedAnimation();
+	easing_animated_trans_y.setFrameBasedAnimation();
+	easing_animated_trans_z.setFrameBasedAnimation();
 }
 
 CameraEasing::~CameraEasing() {
 	// TODO Auto-generated destructor stub
 }
 
+void CameraEasing::start(){
+	easing_animated_rot_x.setParameters(easing,ofxTween::easeInOut,begin_animated_rot_x,end_animated_rot_x,duration_animated_rot_x,0);
+	easing_animated_rot_y.setParameters(easing,ofxTween::easeInOut,begin_animated_rot_y,end_animated_rot_y,duration_animated_rot_y,0);
+	easing_animated_rot_z.setParameters(easing,ofxTween::easeInOut,begin_animated_rot_z,end_animated_rot_z,duration_animated_rot_z,0);
+	easing_animated_trans_x.setParameters(easing,ofxTween::easeInOut,begin_animated_trans_x,end_animated_trans_x,duration_animated_trans_x,0);
+	easing_animated_trans_y.setParameters(easing,ofxTween::easeInOut,begin_animated_trans_y,end_animated_trans_y,duration_animated_trans_y,0);
+	easing_animated_trans_z.setParameters(easing,ofxTween::easeInOut,begin_animated_trans_z,end_animated_trans_z,duration_animated_trans_z,0);
+
+	easing_animated_rot_x.start();
+	easing_animated_rot_y.start();
+	easing_animated_rot_z.start();
+	easing_animated_trans_x.start();
+	easing_animated_trans_y.start();
+	easing_animated_trans_z.start();
+
+}
+
 void CameraEasing::update(){
-	if (begin_animated_rot_x != end_animated_rot_x)
-	{
-		begin_animated_rot_x = makeAnimation(begin_animated_rot_x, end_animated_rot_x, speed_animated_rot_x);
-		speed_animated_rot_x *= easing_animated_rot_x;
-		animated_rot_x = begin_animated_rot_x;
-	}
-
-	if (begin_animated_rot_y != end_animated_rot_y)
-	{
-		begin_animated_rot_y = makeAnimation(begin_animated_rot_y, end_animated_rot_y, speed_animated_rot_y);
-		speed_animated_rot_y *= easing_animated_rot_y;
-		animated_rot_y = begin_animated_rot_y;
-	}
-
-	if (begin_animated_rot_z != end_animated_rot_z)
-	{
-		begin_animated_rot_z = makeAnimation(begin_animated_rot_z, end_animated_rot_z, speed_animated_rot_z);
-		speed_animated_rot_z *= easing_animated_rot_z;
-		animated_rot_z = begin_animated_rot_z;
-	}
-
-	if (begin_animated_trans_x != end_animated_trans_x)
-	{
-		begin_animated_trans_x = makeAnimation(begin_animated_trans_x, end_animated_trans_x, speed_animated_trans_x);
-		speed_animated_trans_x *= easing_animated_trans_x;
-		animated_trans_x = begin_animated_trans_x;
-	}
-
-	if (begin_animated_trans_y != end_animated_trans_y)
-	{
-		begin_animated_trans_y = makeAnimation(begin_animated_trans_y, end_animated_trans_y, speed_animated_trans_y);
-		speed_animated_trans_y *= easing_animated_trans_y;
-		animated_trans_y = begin_animated_trans_y;
-	}
-
-	if (begin_animated_trans_z != end_animated_trans_z)
-	{
-		begin_animated_trans_z = makeAnimation(begin_animated_trans_z, end_animated_trans_z, speed_animated_trans_z);
-		speed_animated_trans_z *= easing_animated_trans_z;
-		animated_trans_z = begin_animated_trans_z;
-	}
-
+	animated_rot_x = easing_animated_rot_x.update();
+	animated_rot_y = easing_animated_rot_y.update();
+	animated_rot_z = easing_animated_rot_z.update();
+	animated_trans_x = easing_animated_trans_x.update();
+	animated_trans_y = easing_animated_trans_y.update();
+	animated_trans_z = easing_animated_trans_z.update();
 }
 
 void CameraEasing::rotate(){

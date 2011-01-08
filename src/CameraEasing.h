@@ -8,24 +8,18 @@
 #ifndef CAMERAEASING_H_
 #define CAMERAEASING_H_
 
+#include "ofxTween.h"
+
 class CameraEasing {
 public:
 	CameraEasing();
 	virtual ~CameraEasing();
 
-	void setup();
+	void start();
 	void update();
 	void rotate();
 	void translate();
 
-
-	//--------------------------------------------------------------
-	float makeAnimation(float begin_value, float end_value, float speed){
-		if(begin_value < end_value) begin_value += speed;
-		else if(begin_value > end_value) begin_value -= speed;
-		else if(begin_value == end_value) begin_value = begin_value;
-		return begin_value;
-	}
 
 	float begin_animated_rot_x;
 	float begin_animated_rot_y;
@@ -41,19 +35,22 @@ public:
 	float end_animated_trans_y;
 	float end_animated_trans_z;
 
-	float speed_animated_rot_x;
-	float speed_animated_rot_y;
-	float speed_animated_rot_z;
-	float speed_animated_trans_x;
-	float speed_animated_trans_y;
-	float speed_animated_trans_z;
+	float duration_animated_rot_x;
+	float duration_animated_rot_y;
+	float duration_animated_rot_z;
+	float duration_animated_trans_x;
+	float duration_animated_trans_y;
+	float duration_animated_trans_z;
 
-	float easing_animated_rot_x;
-	float easing_animated_rot_y;
-	float easing_animated_rot_z;
-	float easing_animated_trans_x;
-	float easing_animated_trans_y;
-	float easing_animated_trans_z;
+private:
+	ofxTween easing_animated_rot_x;
+	ofxTween easing_animated_rot_y;
+	ofxTween easing_animated_rot_z;
+	ofxTween easing_animated_trans_x;
+	ofxTween easing_animated_trans_y;
+	ofxTween easing_animated_trans_z;
+
+	ofxEasingSine easing;
 
 	float animated_rot_x;
 	float animated_rot_y;
@@ -62,9 +59,6 @@ public:
 	float animated_trans_y;
 	float animated_trans_z;
 
-	float begin_value;
-	float end_value;
-	float speed;
 };
 
 #endif /* CAMERAEASING_H_ */

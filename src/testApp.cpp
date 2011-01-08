@@ -243,13 +243,13 @@ void testApp::drawScene(){
 			}
 
 			if(controlsWindow->showClipPlanes){
-			ofPushMatrix();
-				ofSetColor(255,0,0);
-				ofTranslate(0,0,-controlsWindow->nearClip);
-				ofRect(0,0,640,480);
-				ofTranslate(0,0,controlsWindow->nearClip-controlsWindow->depthThreshold);
-				ofRect(0,0,640,480);
-			ofPopMatrix();
+				ofPushMatrix();
+					ofSetColor(255,0,0);
+					ofTranslate(0,0,-controlsWindow->nearClip);
+					ofRect(0,0,640,480);
+					ofTranslate(0,0,controlsWindow->nearClip-controlsWindow->depthThreshold);
+					ofRect(0,0,640,480);
+				ofPopMatrix();
 			}
 
 			if(controlsWindow->useDepthFactor || controlsWindow->dof){
@@ -291,9 +291,15 @@ void testApp::drawScene(){
 					/*else if(!mesh)
 						pc_renderer.draw(&source->getTextureReference());*/
 					}else if(controlsWindow->color){
-						mesh_renderer[i].draw(&source->getTextureReference());
-					}else if(pc_renderer[i].depthToGray){
-						mesh_renderer[i].draw(&source->getDepthTextureReference());
+						if(i==0)
+							mesh_renderer[i].draw(&source->getTextureReference());
+						else
+							mesh_renderer[i].draw(&kPlayer[i-1].getTextureReference());
+					}else if(controlsWindow->depthToGray){
+						if(i==0)
+							mesh_renderer[i].draw(&source->getDepthTextureReference());
+						else
+							mesh_renderer[i].draw(&kPlayer[i-1].getDepthTextureReference());
 					}else{
 						mesh_renderer[i].draw();
 					}
@@ -390,24 +396,24 @@ void testApp::liveVideoChanged(bool & pressed){
 		kinect.setCameraTiltAngle(controlsWindow->tilt);
 
 		//women
-		kPlayer[0].setup("6-13-9-48/depth.bin",true);
+		/*kPlayer[0].setup("6-13-9-48/depth.bin",true);
 		kPlayer[1].setup("6-14-17-4/depth.bin",true);
 		kPlayer[2].setup("6-14-38-34/depth.bin",true);
-		kPlayer[3].setup("6-15-1-52/depth.bin",true);
+		kPlayer[3].setup("6-15-1-52/depth.bin",true);*/
 
 
 		//dresses
-		/*kPlayer[0].setup("dresses/5-16-52-46/depth.bin",true);
+		kPlayer[0].setup("dresses/5-16-52-46/depth.bin",true);
 		kPlayer[1].setup("dresses/5-17-8-59/depth.bin",true);
 		kPlayer[2].setup("dresses/5-18-59-54/depth.bin",true);
 		kPlayer[3].setup("dresses/5-19-13-23/depth.bin",true);
-		kPlayer[4].setup("dresses/5-19-33-10/depth.bin",true);*/
+		kPlayer[4].setup("dresses/5-19-33-10/depth.bin",true);
 
 		source = &kinect;
 
 		controlsWindow->numPlayers = 4;
 	}else{
-		kPlayer[0].setup("6-13-9-48/depth.bin",true);
+		kPlayer[0].setup("dresses/5-16-52-46/depth.bin",true);
 		source = &kPlayer[0];
 
 		controlsWindow->numPlayers = 1;
@@ -477,92 +483,63 @@ void testApp::activateCameraEasing(bool & pressed){
 
 	// variables for animation
 	// SETTING 2 : swooping out slightly to left
-
 	 cameraEasing.begin_animated_rot_x = 50;
 	 cameraEasing.end_animated_rot_x = -50;
-	 cameraEasing.speed_animated_rot_x = 1;
-	 cameraEasing.easing_animated_rot_x = 0.99;
-	 cameraEasing.animated_rot_x = 0;
+	 cameraEasing.duration_animated_rot_x = 300;
 
 	 cameraEasing.begin_animated_rot_y = 0;
 	 cameraEasing.end_animated_rot_y = 0;
-	 cameraEasing.speed_animated_rot_y = 1;
-	 cameraEasing.easing_animated_rot_y = 1;
-	 cameraEasing.animated_rot_y = 0;
+	 cameraEasing.duration_animated_rot_y = 300;
 
 	 cameraEasing. begin_animated_rot_z = 0;
 	 cameraEasing.end_animated_rot_z = 0;
-	 cameraEasing.speed_animated_rot_z = 1;
-	 cameraEasing.easing_animated_rot_z = 1;
-	 cameraEasing.animated_rot_z = 0;
+	 cameraEasing.duration_animated_rot_z = 300;
 
 	 cameraEasing.begin_animated_trans_x = 0;
 	 cameraEasing.end_animated_trans_x = 0;
-	 cameraEasing.speed_animated_trans_x = 1;
-	 cameraEasing.easing_animated_trans_x = 1;
-	 cameraEasing.animated_trans_x = 0;
+	 cameraEasing.duration_animated_trans_x = 300;
 
 	 cameraEasing.begin_animated_trans_y = 0;
 	 cameraEasing.end_animated_trans_y = 0;
-	 cameraEasing.speed_animated_trans_y = 1;
-	 cameraEasing.easing_animated_trans_y = 1;
-	 cameraEasing.animated_trans_y = 0;
+	 cameraEasing.duration_animated_trans_y = 300;
 
 	 cameraEasing.begin_animated_trans_z = 0;
 	 cameraEasing.end_animated_trans_z = 0;
-	 cameraEasing.speed_animated_trans_z = 1;
-	 cameraEasing.easing_animated_trans_z = 1;
-	 cameraEasing.animated_trans_z = 0;
+	 cameraEasing.duration_animated_trans_z = 300;
 
+	 cameraEasing.start();
 
-	 cameraEasing.begin_value = 0;
-	 cameraEasing.end_value = 0;
-	 cameraEasing.speed = 0;
 }
 
 void testApp::activateCameraEasing2(bool & pressed){
 	// variables for animation
-		// SETTING 1 : swooping out slightly to left
+	// SETTING 1 : swooping out slightly to left
 
-	cameraEasing.begin_animated_rot_x = 0.0;
-	cameraEasing.end_animated_rot_x = -25.0;
-	cameraEasing.speed_animated_rot_x = 0.25;
-	cameraEasing.easing_animated_rot_x = 0.99;
-	cameraEasing.animated_rot_x = 0;
+	cameraEasing.begin_animated_rot_x = -25.0;
+	cameraEasing.end_animated_rot_x = 0.0;
+	cameraEasing.duration_animated_rot_x = 300;
 
-	cameraEasing.begin_animated_rot_y = 0.0;
-	cameraEasing.end_animated_rot_y = 90.0;
-	cameraEasing.speed_animated_rot_y = 0.5;
-	cameraEasing.easing_animated_rot_y = 0.99;
-	cameraEasing.animated_rot_y = 0;
+	cameraEasing.begin_animated_rot_y = 90.0;
+	cameraEasing.end_animated_rot_y = 0.0;
+	cameraEasing.duration_animated_rot_y = 300;
 
 	cameraEasing.begin_animated_rot_z = 0;
 	cameraEasing.end_animated_rot_z = 0;
-	cameraEasing.speed_animated_rot_z = 0;
-	cameraEasing.easing_animated_rot_z = 0;
-	cameraEasing.animated_rot_z = 0;
+	cameraEasing.duration_animated_rot_z = 300;
 
 	cameraEasing.begin_animated_trans_x = 0;
 	cameraEasing.end_animated_trans_x = 0;
-	cameraEasing.speed_animated_trans_x = 0;
-	cameraEasing.easing_animated_trans_x = 0;
-	cameraEasing.animated_trans_x = 0;
+	cameraEasing.duration_animated_trans_x = 300;
 
-	cameraEasing.begin_animated_trans_y = 0;
-	cameraEasing.end_animated_trans_y = 200;
-	cameraEasing.speed_animated_trans_y = 5.0;
-	cameraEasing.easing_animated_trans_y = 0.95;
-	cameraEasing.animated_trans_y = 0;
+	cameraEasing.begin_animated_trans_y = 200;
+	cameraEasing.end_animated_trans_y = 0;
+	cameraEasing.duration_animated_trans_y = 300;
 
-	cameraEasing.begin_animated_trans_z = 0;
-	cameraEasing.end_animated_trans_z = -1000;
-	cameraEasing.speed_animated_trans_z = 5.0;
-	cameraEasing.easing_animated_trans_z = 0.99;
-	cameraEasing.animated_trans_z = 0;
+	cameraEasing.begin_animated_trans_z = -1000;
+	cameraEasing.end_animated_trans_z = 0;
+	cameraEasing.duration_animated_trans_z = 300;
 
-	cameraEasing.begin_value = 0;
-	cameraEasing.end_value = 0;
-	cameraEasing.speed = 0;
+	cameraEasing.start();
 
 }
 //--------------------------------------------------------------
