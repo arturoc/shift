@@ -15,6 +15,7 @@
 #include "ofxBase3DVideo.h"
 #include "ofxKinectRecorder.h"
 #include "SCRenderer.h"
+#include "CameraEasing.h"
 
 class ControlsWindow;
 
@@ -53,6 +54,9 @@ class testApp : public ofBaseApp{
 		void toggleTwoScreens(bool & pressed);
 		void showWarpChanged(bool & pressed);
 
+		void activateCameraEasing(bool & pressed);
+		void activateCameraEasing2(bool & pressed);
+
 		ofxKinectPlayer kPlayer[10];
 		ofxKinect	 kinect;
 		ofxBase3DVideo * source;
@@ -86,6 +90,9 @@ class testApp : public ofBaseApp{
 
 
 		ControlsWindow * controlsWindow;
+
+		CameraEasing cameraEasing;
+
 };
 
 #endif

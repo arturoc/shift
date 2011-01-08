@@ -80,7 +80,7 @@ public:
 	float	postTranslateZ;
 
 	bool showContour, showDepth, showClipPlanes, showRGB, showStats;
-
+	bool doCameraEasing;
 
 	ofxWFrame gui;
 	ofxWFrame comp_gui;

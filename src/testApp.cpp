@@ -184,6 +184,10 @@ void testApp::update(){
 	if(recorder.isOpened() && source==(ofxBase3DVideo*)&kinect){
 		recorder.newFrame(kinect.getPixels(),kinect.getRawDepthPixels());
 	}
+
+	if(controlsWindow->doCameraEasing){
+		cameraEasing.update();
+	}
 }
 
 void testApp::drawScene(){
@@ -212,6 +216,13 @@ void testApp::drawScene(){
 
 			ofTranslate(controlsWindow->rot_axis);
 			ofRotate(controlsWindow->rot,0,1,0);
+
+
+
+			if(controlsWindow->doCameraEasing){
+				cameraEasing.rotate();
+			}
+
 			if(controlsWindow->showClipPlanes){
 				ofSetColor(255,0,0);
 				ofLine(0,0,0,ofGetHeight());
@@ -220,9 +231,17 @@ void testApp::drawScene(){
 
 			ofTranslate(0,0,controlsWindow->translateZ);
 
+
+
+			if(controlsWindow->doCameraEasing){
+				cameraEasing.translate();
+			}
+
+
 			if(controlsWindow->useDepthFactor || controlsWindow->dof){
 				ofScale(2,2,2);
 			}
+
 			if(controlsWindow->showClipPlanes){
 			ofPushMatrix();
 				ofSetColor(255,0,0);
@@ -454,6 +473,98 @@ void testApp::showWarpChanged(bool & pressed){
 	}
 }
 
+void testApp::activateCameraEasing(bool & pressed){
+
+	// variables for animation
+	// SETTING 2 : swooping out slightly to left
+
+	 cameraEasing.begin_animated_rot_x = 50;
+	 cameraEasing.end_animated_rot_x = -50;
+	 cameraEasing.speed_animated_rot_x = 1;
+	 cameraEasing.easing_animated_rot_x = 0.99;
+	 cameraEasing.animated_rot_x = 0;
+
+	 cameraEasing.begin_animated_rot_y = 0;
+	 cameraEasing.end_animated_rot_y = 0;
+	 cameraEasing.speed_animated_rot_y = 1;
+	 cameraEasing.easing_animated_rot_y = 1;
+	 cameraEasing.animated_rot_y = 0;
+
+	 cameraEasing. begin_animated_rot_z = 0;
+	 cameraEasing.end_animated_rot_z = 0;
+	 cameraEasing.speed_animated_rot_z = 1;
+	 cameraEasing.easing_animated_rot_z = 1;
+	 cameraEasing.animated_rot_z = 0;
+
+	 cameraEasing.begin_animated_trans_x = 0;
+	 cameraEasing.end_animated_trans_x = 0;
+	 cameraEasing.speed_animated_trans_x = 1;
+	 cameraEasing.easing_animated_trans_x = 1;
+	 cameraEasing.animated_trans_x = 0;
+
+	 cameraEasing.begin_animated_trans_y = 0;
+	 cameraEasing.end_animated_trans_y = 0;
+	 cameraEasing.speed_animated_trans_y = 1;
+	 cameraEasing.easing_animated_trans_y = 1;
+	 cameraEasing.animated_trans_y = 0;
+
+	 cameraEasing.begin_animated_trans_z = 0;
+	 cameraEasing.end_animated_trans_z = 0;
+	 cameraEasing.speed_animated_trans_z = 1;
+	 cameraEasing.easing_animated_trans_z = 1;
+	 cameraEasing.animated_trans_z = 0;
+
+
+	 cameraEasing.begin_value = 0;
+	 cameraEasing.end_value = 0;
+	 cameraEasing.speed = 0;
+}
+
+void testApp::activateCameraEasing2(bool & pressed){
+	// variables for animation
+		// SETTING 1 : swooping out slightly to left
+
+	cameraEasing.begin_animated_rot_x = 0.0;
+	cameraEasing.end_animated_rot_x = -25.0;
+	cameraEasing.speed_animated_rot_x = 0.25;
+	cameraEasing.easing_animated_rot_x = 0.99;
+	cameraEasing.animated_rot_x = 0;
+
+	cameraEasing.begin_animated_rot_y = 0.0;
+	cameraEasing.end_animated_rot_y = 90.0;
+	cameraEasing.speed_animated_rot_y = 0.5;
+	cameraEasing.easing_animated_rot_y = 0.99;
+	cameraEasing.animated_rot_y = 0;
+
+	cameraEasing.begin_animated_rot_z = 0;
+	cameraEasing.end_animated_rot_z = 0;
+	cameraEasing.speed_animated_rot_z = 0;
+	cameraEasing.easing_animated_rot_z = 0;
+	cameraEasing.animated_rot_z = 0;
+
+	cameraEasing.begin_animated_trans_x = 0;
+	cameraEasing.end_animated_trans_x = 0;
+	cameraEasing.speed_animated_trans_x = 0;
+	cameraEasing.easing_animated_trans_x = 0;
+	cameraEasing.animated_trans_x = 0;
+
+	cameraEasing.begin_animated_trans_y = 0;
+	cameraEasing.end_animated_trans_y = 200;
+	cameraEasing.speed_animated_trans_y = 5.0;
+	cameraEasing.easing_animated_trans_y = 0.95;
+	cameraEasing.animated_trans_y = 0;
+
+	cameraEasing.begin_animated_trans_z = 0;
+	cameraEasing.end_animated_trans_z = -1000;
+	cameraEasing.speed_animated_trans_z = 5.0;
+	cameraEasing.easing_animated_trans_z = 0.99;
+	cameraEasing.animated_trans_z = 0;
+
+	cameraEasing.begin_value = 0;
+	cameraEasing.end_value = 0;
+	cameraEasing.speed = 0;
+
+}
 //--------------------------------------------------------------
 void testApp::keyPressed(int key){
 }

@@ -42,6 +42,7 @@ void ControlsWindow::fensterSetup(){
 	nearClip=0;farClip=0;
 	fov = 60;
 	postTranslateZ=0;
+	doCameraEasing = false;
 
 	gui.init("");
 	gui.addTab("3d camera");
@@ -122,8 +123,9 @@ void ControlsWindow::fensterSetup(){
 	gui.addSpinSlider("pSize factor", &pointSizeFactor, 1, 30);
 	gui.addToggle("white screen",&whiteScreen);
 	gui.addToggle("move warp",&app->warp.moveOrigin);
-	ofAddListener(gui.addButton("two screens").boolEvent,app,&testApp::toggleTwoScreens);
-
+	//ofAddListener(gui.addButton("two screens").boolEvent,app,&testApp::toggleTwoScreens);
+	ofAddListener(gui.addToggle("camera easing",&doCameraEasing).boolEvent,app,&testApp::activateCameraEasing);
+	ofAddListener(gui.addToggle("camera easing2",&doCameraEasing).boolEvent,app,&testApp::activateCameraEasing2);
 	gui.loadFrom("settings.xml","settings");
 
 
