@@ -24,6 +24,8 @@ public:
 	void enable();
 	void disable();
 
+	void setLocalEventsObject(ofCoreEvents * events);
+
 	ofPoint src[4];
 	ofPoint dst[4];
 

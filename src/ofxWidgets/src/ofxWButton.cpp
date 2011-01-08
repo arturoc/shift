@@ -28,6 +28,7 @@ bool ofxWButton::getValueB(){
 }
 
 void ofxWButton::init(const string & _title, int * _value, string style){
+	ofxWidget::init();
 	itargetValue = _value;
 	if(_value){
 		value	= *_value;
@@ -42,6 +43,7 @@ void ofxWButton::init(const string & _title, int * _value, string style){
 }
 
 void ofxWButton::init(const string & _title, bool * _value, string style){
+	ofxWidget::init();
 	btargetValue = _value;
 	if(_value && *_value){
 		value	= 1;
@@ -57,6 +59,7 @@ void ofxWButton::init(const string & _title, bool * _value, string style){
 }
 
 void ofxWButton::init(const string & _title, bool _value, string style){
+	ofxWidget::init();
 	if(_value){
 		on();
 		state	= OFX_WIDGET_PRESSED;
@@ -69,6 +72,7 @@ void ofxWButton::init(const string & _title, bool _value, string style){
 }
 
 void ofxWButton::init(const string & _title, string style){
+	ofxWidget::init();
 	btargetValue = NULL;
 	itargetValue = NULL;
 	value	= 0;

@@ -16,10 +16,12 @@
 #include "ofxKinectRecorder.h"
 #include "SCRenderer.h"
 
+class ControlsWindow;
+
 class testApp : public ofBaseApp{
 
 	public:
-		testApp(){}
+		testApp();
 		void setup();
 		void update();
 		void draw();
@@ -61,69 +63,29 @@ class testApp : public ofBaseApp{
 
 		ofxCamera camera;
 
-		ofxWFrame gui;
-		ofxWFrame comp_gui;
 
 		ofxCvGrayscaleImage cvdepth;
 		ofxCvGrayscaleImage 	grayThresh;
 		ofxCvGrayscaleImage 	grayThreshFar;
 		ofxCvContourFinder  contourFinder;
 
-		int min_blob, max_blob;
-
-		float nearClip,farClip;
-		float fov;
-
-		ofPoint rot_axis;
-		float	rot;
-		float   translateZ,translateX,translateY;
-		float	postTranslateZ;
-
-		bool showContour, showDepth, showClipPlanes, showRGB, showStats;
 
 		ofxFbo fbo,fbo2;
 
-		float tilt;
-		int gray,alpha,psize;
 
 		ofImage pointTex,bokehTex,gaussTex;
 
-		bool texPoints;
-		bool mesh;
-		bool color;
-		bool depthToGray;
-
-		float depthThreshold,minDistance,scaleFactor;
-		bool useDepthFactor;
 
 		ofTexture texRGBCalibrated;
 
 		ofxKinectRecorder recorder;
 
-		float dramaticZoomFactor;
-
 		ofxWQuadWarp warp, warp2;
 		ofxMatrix4x4 homography,homography2;
 		ofPoint src[4],dst[4];
-		bool whiteScreen;
-
-		bool twoScreens;
-		bool noRender;
 
 
-		int fps;
-
-		int oneInX, oneInY;
-		bool dof;
-		int minimumGray;
-		int objectDepthThreshold;
-
-		float focusDistance, aperture, pointBrightness, rgbBrightness, maxPointSize, pointSizeFactor;
-
-		int numPlayers;
-		bool showLive,showPlayer[10],onlyLive;
-		bool showWarp;
-		bool soundCloud;
+		ControlsWindow * controlsWindow;
 };
 
 #endif

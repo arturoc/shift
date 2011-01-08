@@ -10,25 +10,15 @@
 #include "ofxWInputManager.h"
 
 //static ofxWInputManager inputManager;
+ofCoreEvents * ofxWidget::eventsObject = &ofEvents;
 
 #ifdef OFXWIDGETS_USING_TUIO
 ofxTuioClient * ofxWidget::tuioClient = NULL;
 #endif
 
 ofxWidget::ofxWidget(const string & name) {
+	localEventsObject = NULL;
 	//
-	this->name = name;
-	enabled = false;
-	visible = false;
-	state = OFX_WIDGET_UNFOCUSED;
-
-	if(dynamic_cast<ofxWControlPanel*>(this)==NULL){
-		//ofxWControlPanel::getControlPanel()->registerControl(this);
-		enable();
-	}
-	setVisible(true);
-	styleLoader = &(ofxWStyleLoader::getLoader());
-	state		= OFX_WIDGET_UNFOCUSED;
 
 	/*if(dynamic_cast<ofxWFrame*>(this)==NULL){
 		inputManager.registerWidget(this);
@@ -37,6 +27,22 @@ ofxWidget::ofxWidget(const string & name) {
 
 ofxWidget::~ofxWidget() {
 
+}
+
+void ofxWidget::init(){
+	if(!localEventsObject) localEventsObject = eventsObject;
+	this->name = name;
+	enabled = false;
+	visible = false;
+	state = OFX_WIDGET_UNFOCUSED;
+
+	styleLoader = &(ofxWStyleLoader::getLoader());
+	state		= OFX_WIDGET_UNFOCUSED;
+	if(dynamic_cast<ofxWFrame*>(this)==NULL){
+		//ofxWControlPanel::getControlPanel()->registerControl(this);
+	}
+	enable();
+	setVisible(true);
 }
 
 ofxWidgetsState ofxWidget::manageEvent(ofxWidgetsEvent event, ofxWidgetEventArgs & args, ofxWidgetsState currentState){
@@ -93,12 +99,11 @@ void ofxWidget::setTuio(ofxTuioClient & _tuioClient){
 
 void ofxWidget::enable(){
 
-	ofAddListener(ofEvents.update,this,&ofxWidget::update);
-	ofRegisterMouseEvents(this);
-	//ofAddListener(ofEvents.mousePressed,this,&ofxWidget::mousePressed);
-	//ofAddListener(ofEvents.mouseReleased,this,&ofxWidget::mouseReleased);
-	//ofAddListener(ofEvents.mouseMoved,this,&ofxWidget::mouseMoved);
-	//ofAddListener(ofEvents.mouseDragged,this,&ofxWidget::mouseDragged);
+	ofAddListener(localEventsObject->update,this,&ofxWidget::update);
+	ofAddListener(localEventsObject->mousePressed,this,&ofxWidget::mousePressed);
+	ofAddListener(localEventsObject->mouseReleased,this,&ofxWidget::mouseReleased);
+	ofAddListener(localEventsObject->mouseMoved,this,&ofxWidget::mouseMoved);
+	ofAddListener(localEventsObject->mouseDragged,this,&ofxWidget::mouseDragged);
 	#ifdef OFXWIDGETS_USING_TUIO
 		if(tuioClient){
 			ofAddListener(tuioClient->cursorAdded, this, &ofxWidget::addTuioCursor);
@@ -111,14 +116,13 @@ void ofxWidget::enable(){
 }
 
 void ofxWidget::disable(){
-	ofRemoveListener(ofEvents.update,this,&ofxWidget::update);
+	ofRemoveListener(localEventsObject->update,this,&ofxWidget::update);
 
-	//ofRemoveListener(ofEvents.mousePressed,this,&ofxWidget::mousePressed);
-	//ofRemoveListener(ofEvents.mouseReleased,this,&ofxWidget::mouseReleased);
-	//ofRemoveListener(ofEvents.mouseMoved,this,&ofxWidget::mouseMoved);
-	//ofRemoveListener(ofEvents.mouseDragged,this,&ofxWidget::mouseDragged);
-	ofUnregisterMouseEvents(this);
-	ofUnregisterKeyEvents(this);
+	ofRemoveListener(localEventsObject->mousePressed,this,&ofxWidget::mousePressed);
+	ofRemoveListener(localEventsObject->mouseReleased,this,&ofxWidget::mouseReleased);
+	ofRemoveListener(localEventsObject->mouseMoved,this,&ofxWidget::mouseMoved);
+	ofRemoveListener(localEventsObject->mouseDragged,this,&ofxWidget::mouseDragged);
+
 	#ifdef OFXWIDGETS_USING_TUIO
 		if(tuioClient){
 			ofRemoveListener(tuioClient->cursorAdded, this, &ofxWidget::addTuioCursor);
@@ -133,9 +137,9 @@ void ofxWidget::disable(){
 void ofxWidget::setVisible(bool _visible){
 	visible=_visible;
 	if(_visible)
-		ofAddListener(ofEvents.draw,this,&ofxWidget::draw);
+		ofAddListener(localEventsObject->draw,this,&ofxWidget::draw);
 	else
-		ofRemoveListener(ofEvents.draw,this,&ofxWidget::draw);
+		ofRemoveListener(localEventsObject->draw,this,&ofxWidget::draw);
 }
 
 
@@ -358,7 +362,13 @@ bool ofxWidget::cursorIn(TUIO::TuioCursor & tuioCursor){
 #endif
 
 
+void ofxWidget::setEventsObject(ofCoreEvents * events){
+	eventsObject = events;
+}
 
+void ofxWidget::setLocalEventsObject(ofCoreEvents * events){
+	localEventsObject = events;
+}
 
 ofxWidgetsStyle & ofxWidget::getCurrentStyle(){
 	if(!enabled)

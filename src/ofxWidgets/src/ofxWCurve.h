@@ -41,6 +41,7 @@ public:
 	}
 
 	void init(ofRectangle origin, float _min_x=0, float _max_x=1, float _min_y=-1, float _max_y=1){
+		ofxWidget::init();
 		zoom_min = min_x = _min_x;
 		zoom_max = max_x = _max_x;
 		min_y = _min_y;

@@ -13,6 +13,10 @@ ofxWQuadWarp::ofxWQuadWarp()
 	moveOrigin = false;
 	resize = false;
 	keepAspect = false;
+
+	for(int i=0; i<4; i++){
+		buttons[i] = new ofxWCircleButton("button" + ofToString(i));
+	}
 }
 
 void ofxWQuadWarp::init(ofRectangle origin){
@@ -33,7 +37,6 @@ void ofxWQuadWarp::init(ofRectangle origin){
 
 	for(int i=0; i<4; i++){
 		dst[i] = src[i];
-		buttons[i] = new ofxWCircleButton("button" + ofToString(i));
 		buttons[i]->init("");
 		ofAddListener(buttons[i]->boolEvent,this,&ofxWQuadWarp::buttonPressed);
 	}
@@ -242,5 +245,13 @@ void ofxWQuadWarp::disable(){
 	ofxWidget::disable();
 	for(int i=0;i<4;i++){
 		buttons[i]->disable();
+	}
+}
+
+
+void ofxWQuadWarp::setLocalEventsObject(ofCoreEvents * events){
+	ofxWidget::setLocalEventsObject(events);
+	for(int i=0;i<4;i++){
+		buttons[i]->setLocalEventsObject(events);
 	}
 }

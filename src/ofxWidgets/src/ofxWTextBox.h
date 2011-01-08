@@ -17,6 +17,7 @@ public:
 	}
 
 	void init(const string & title, const string & style){
+		ofxWidget::init();
 		this->title = title;
 		setStyles("textbox",style);
 	}

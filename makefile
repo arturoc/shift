@@ -27,7 +27,7 @@
 
 COMPILER_OPTIMIZATION = -march=native -mtune=native -O3
 EXCLUDE_FROM_SOURCE="bin,.xcodeproj,obj"
-USER_CFLAGS = -I src/ofxKinect/src -I src/ofxKinect/libs/libfreenect -I /usr/include/libusb-1.0 -I src/ofxWidgets/src -Isrc/ofx3DUtils/src
+USER_CFLAGS = -I src/ofxKinect/src -I src/ofxKinect/libs/libfreenect -I /usr/include/libusb-1.0 -I src/ofxWidgets/src -I src/ofxFenster -Isrc/ofx3DUtils/src
 USER_LD_FLAGS = 
 USER_LIBS = -lusb-1.0 
 

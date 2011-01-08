@@ -43,6 +43,7 @@ protected:
 	virtual void onVisible(ofPoint point){}
 	virtual void onInvisible(ofPoint point){}
 
+	void init();
 
 	ofxWidgetsStyle getStyle(string controlType, string state, string style="default");
 
@@ -170,6 +171,10 @@ public:
 
 	ofxWidgetsStyle & getCurrentStyle();
 
+
+	static void setEventsObject(ofCoreEvents * events);
+	void setLocalEventsObject(ofCoreEvents * events);
+
 private:
 
 	ofPoint getRelativePosition(float x, float y);
@@ -192,6 +197,9 @@ private:
 
 	ofxWidgetEventArgs 		yargs;
 	set<int> cursorsIn;
+
+	static ofCoreEvents * eventsObject;
+	ofCoreEvents * localEventsObject;
 
 };
 

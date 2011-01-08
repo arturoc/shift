@@ -11,6 +11,7 @@ ofxWFrame::ofxWFrame():ofxWidget(""){
 }
 
 void ofxWFrame::init(const string & title, const string & name, bool growOnHeight){
+	ofxWidget::init();
 	if(next_pos.y + frameStyle.interFrameVSpace + frameStyle.decoration_h*2>ofGetHeight()){
 		next_pos.y = 0;
 		next_pos.x += max_frame_width + frameStyle.interFrameHSpace;
@@ -23,6 +24,7 @@ void ofxWFrame::init(const string & title, const string & name, bool growOnHeigh
 }
 
 void ofxWFrame::init(float x, float y, float width, float height, const string & title, const string & name, bool growOnHeight){
+	ofxWidget::init();
 	frameStyle.width = width;
 	frameStyle.border.width = width + frameStyle.hSpacing*2.0;
 	frameStyle.height = height;

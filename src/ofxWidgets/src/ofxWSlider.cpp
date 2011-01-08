@@ -16,6 +16,7 @@ ofxWSlider::ofxWSlider(const string & name):ofxWidget(name){
 }
 
 void ofxWSlider::init(const string & _title, float * value, float _min, float _max, const string & style){
+	ofxWidget::init();
 	itargetValue	= 0;
 	ftargetValue	= value;
 	title			= _title;
@@ -26,6 +27,7 @@ void ofxWSlider::init(const string & _title, float * value, float _min, float _m
 }
 
 void ofxWSlider::init(const string & _title, int * value, int _min, int _max, const string & style){
+	ofxWidget::init();
 	ftargetValue	= 0;
 	itargetValue	= value;
 	title			= _title;
@@ -36,6 +38,7 @@ void ofxWSlider::init(const string & _title, int * value, int _min, int _max, co
 
 }
 void ofxWSlider::init(const string & _title, float _value, float _min, float _max, const string & style){
+	ofxWidget::init();
 	itargetValue	= 0;
 	ftargetValue	= 0;
 	title			= _title;
@@ -47,6 +50,7 @@ void ofxWSlider::init(const string & _title, float _value, float _min, float _ma
 }
 
 void ofxWSlider::init(const string & _title, int _value, int _min, int _max, const string & style){
+	ofxWidget::init();
 	ftargetValue	= 0;
 	itargetValue	= 0;
 	title			= _title;
